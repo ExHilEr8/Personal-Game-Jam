@@ -1,0 +1,22 @@
+[gd_scene load_steps=4 format=3 uid="uid://cpw5b5csmui8a"]
+
+[ext_resource type="Script" path="res://scripts/tempbullet.gd" id="1_jekyc"]
+[ext_resource type="Texture2D" uid="uid://cehqvc2pfgajk" path="res://assets/sprites/tempbullet.png" id="1_l8pkb"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_eh2ju"]
+size = Vector2(5, 3)
+
+[node name="tempbullet" type="RigidBody2D" groups=["Projectile"]]
+lock_rotation = true
+max_contacts_reported = 1
+contact_monitor = true
+script = ExtResource("1_jekyc")
+sound_volume = -15.0
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("1_l8pkb")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_eh2ju")
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]

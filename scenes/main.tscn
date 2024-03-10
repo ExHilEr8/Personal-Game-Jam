@@ -1,7 +1,30 @@
-[gd_scene load_steps=2 format=3 uid="uid://dib3hnth51t1o"]
+[gd_scene load_steps=6 format=3 uid="uid://dib3hnth51t1o"]
 
 [ext_resource type="PackedScene" uid="uid://dbwiyy32jjiv8" path="res://scenes/player/player.tscn" id="1_scfp7"]
+[ext_resource type="Script" path="res://scripts/WeaponContainer.gd" id="2_ex5qh"]
+[ext_resource type="PackedScene" uid="uid://bqsven3245ab8" path="res://scenes/pistol.tscn" id="2_gt0pd"]
+[ext_resource type="Texture2D" uid="uid://8ba48ruimrsk" path="res://assets/sprites/tempplayer.png" id="4_c8107"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_vnd6t"]
+size = Vector2(16, 32)
 
 [node name="Main" type="Node2D"]
 
 [node name="Player" parent="." instance=ExtResource("1_scfp7")]
+
+[node name="WeaponContainer" type="Node2D" parent="Player"]
+script = ExtResource("2_ex5qh")
+
+[node name="Pistol" parent="Player/WeaponContainer" instance=ExtResource("2_gt0pd")]
+position = Vector2(20, 0)
+
+[node name="Tempplayer" type="Sprite2D" parent="."]
+position = Vector2(77, 76)
+texture = ExtResource("4_c8107")
+
+[node name="StaticBody2D" type="StaticBody2D" parent="Tempplayer"]
+collision_layer = 7
+collision_mask = 7
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Tempplayer/StaticBody2D"]
+shape = SubResource("RectangleShape2D_vnd6t")
