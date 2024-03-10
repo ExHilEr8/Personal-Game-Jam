@@ -54,4 +54,7 @@ move_up={
 
 [rendering]
 
+textures/canvas_textures/default_texture_filter=0
 renderer/rendering_method="mobile"
+textures/default_gravity_vector=Vector2(0, 0)
+textures/default_gravity=0.0
