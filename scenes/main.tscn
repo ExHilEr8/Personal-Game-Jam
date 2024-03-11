@@ -1,12 +1,14 @@
-[gd_scene load_steps=6 format=3 uid="uid://dib3hnth51t1o"]
+[gd_scene load_steps=7 format=3 uid="uid://dib3hnth51t1o"]
 
 [ext_resource type="PackedScene" uid="uid://dbwiyy32jjiv8" path="res://scenes/player/player.tscn" id="1_scfp7"]
 [ext_resource type="Script" path="res://scenes/WeaponContainer.gd" id="2_ex5qh"]
 [ext_resource type="PackedScene" uid="uid://cv3jeqsihp3ey" path="res://scenes/weapons/assault_rifles/m4.tscn" id="3_tawrs"]
 [ext_resource type="Texture2D" uid="uid://8ba48ruimrsk" path="res://assets/sprites/tempplayer.png" id="4_c8107"]
+[ext_resource type="PackedScene" uid="uid://bew6phnc4wfen" path="res://scenes/prefabs/EnemyPrefab.tscn" id="4_oagll"]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_vnd6t"]
-size = Vector2(16, 32)
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_f2dak"]
+radius = 8.0
+height = 32.0
 
 [node name="Main" type="Node2D"]
 
@@ -17,16 +19,142 @@ script = ExtResource("2_ex5qh")
 
 [node name="Weapon" parent="Player/WeaponContainer" instance=ExtResource("3_tawrs")]
 position = Vector2(24, 4)
+damage = 5.0
 projectile_speed = 1200.0
 fire_rate = 0.075
 
-[node name="Tempplayer" type="Sprite2D" parent="."]
-position = Vector2(77, 76)
+[node name="EnemyPrefab" parent="." instance=ExtResource("4_oagll")]
+position = Vector2(-95, 25)
+
+[node name="Sprite2D" parent="EnemyPrefab" index="0"]
+self_modulate = Color(1, 0.466667, 0.415686, 1)
 texture = ExtResource("4_c8107")
 
-[node name="StaticBody2D" type="StaticBody2D" parent="Tempplayer" groups=["Enemy"]]
-collision_layer = 7
-collision_mask = 7
+[node name="FloatingUIContainer" parent="EnemyPrefab" index="1"]
+position = Vector2(0, -20)
+metadata/_edit_group_ = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Tempplayer/StaticBody2D"]
-shape = SubResource("RectangleShape2D_vnd6t")
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyPrefab"]
+shape = SubResource("CapsuleShape2D_f2dak")
+
+[node name="EnemyPrefab2" parent="." instance=ExtResource("4_oagll")]
+position = Vector2(-59, -91)
+
+[node name="Sprite2D" parent="EnemyPrefab2" index="0"]
+self_modulate = Color(1, 0.466667, 0.415686, 1)
+texture = ExtResource("4_c8107")
+
+[node name="FloatingUIContainer" parent="EnemyPrefab2" index="1"]
+position = Vector2(0, -20)
+metadata/_edit_group_ = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyPrefab2"]
+shape = SubResource("CapsuleShape2D_f2dak")
+
+[node name="EnemyPrefab3" parent="." instance=ExtResource("4_oagll")]
+position = Vector2(151, -24)
+
+[node name="Sprite2D" parent="EnemyPrefab3" index="0"]
+self_modulate = Color(1, 0.466667, 0.415686, 1)
+texture = ExtResource("4_c8107")
+
+[node name="FloatingUIContainer" parent="EnemyPrefab3" index="1"]
+position = Vector2(0, -20)
+metadata/_edit_group_ = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyPrefab3"]
+shape = SubResource("CapsuleShape2D_f2dak")
+
+[node name="EnemyPrefab4" parent="." instance=ExtResource("4_oagll")]
+position = Vector2(85, -120)
+
+[node name="Sprite2D" parent="EnemyPrefab4" index="0"]
+self_modulate = Color(1, 0.466667, 0.415686, 1)
+texture = ExtResource("4_c8107")
+
+[node name="FloatingUIContainer" parent="EnemyPrefab4" index="1"]
+position = Vector2(0, -20)
+metadata/_edit_group_ = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyPrefab4"]
+shape = SubResource("CapsuleShape2D_f2dak")
+
+[node name="EnemyPrefab5" parent="." instance=ExtResource("4_oagll")]
+position = Vector2(22, 103)
+
+[node name="Sprite2D" parent="EnemyPrefab5" index="0"]
+self_modulate = Color(1, 0.466667, 0.415686, 1)
+texture = ExtResource("4_c8107")
+
+[node name="FloatingUIContainer" parent="EnemyPrefab5" index="1"]
+position = Vector2(0, -20)
+metadata/_edit_group_ = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyPrefab5"]
+shape = SubResource("CapsuleShape2D_f2dak")
+
+[node name="EnemyPrefab6" parent="." instance=ExtResource("4_oagll")]
+position = Vector2(135, 45)
+
+[node name="Sprite2D" parent="EnemyPrefab6" index="0"]
+self_modulate = Color(1, 0.466667, 0.415686, 1)
+texture = ExtResource("4_c8107")
+
+[node name="FloatingUIContainer" parent="EnemyPrefab6" index="1"]
+position = Vector2(0, -20)
+metadata/_edit_group_ = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyPrefab6"]
+shape = SubResource("CapsuleShape2D_f2dak")
+
+[node name="EnemyPrefab7" parent="." instance=ExtResource("4_oagll")]
+position = Vector2(182, -78)
+
+[node name="Sprite2D" parent="EnemyPrefab7" index="0"]
+self_modulate = Color(1, 0.466667, 0.415686, 1)
+texture = ExtResource("4_c8107")
+
+[node name="FloatingUIContainer" parent="EnemyPrefab7" index="1"]
+position = Vector2(0, -20)
+metadata/_edit_group_ = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyPrefab7"]
+shape = SubResource("CapsuleShape2D_f2dak")
+
+[node name="EnemyPrefab8" parent="." instance=ExtResource("4_oagll")]
+position = Vector2(291, 112)
+
+[node name="Sprite2D" parent="EnemyPrefab8" index="0"]
+self_modulate = Color(1, 0.466667, 0.415686, 1)
+texture = ExtResource("4_c8107")
+
+[node name="FloatingUIContainer" parent="EnemyPrefab8" index="1"]
+position = Vector2(0, -20)
+metadata/_edit_group_ = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyPrefab8"]
+shape = SubResource("CapsuleShape2D_f2dak")
+
+[node name="EnemyPrefab9" parent="." instance=ExtResource("4_oagll")]
+position = Vector2(360, -50)
+
+[node name="Sprite2D" parent="EnemyPrefab9" index="0"]
+self_modulate = Color(1, 0.466667, 0.415686, 1)
+texture = ExtResource("4_c8107")
+
+[node name="FloatingUIContainer" parent="EnemyPrefab9" index="1"]
+position = Vector2(0, -20)
+metadata/_edit_group_ = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyPrefab9"]
+shape = SubResource("CapsuleShape2D_f2dak")
+
+[editable path="EnemyPrefab"]
+[editable path="EnemyPrefab2"]
+[editable path="EnemyPrefab3"]
+[editable path="EnemyPrefab4"]
+[editable path="EnemyPrefab5"]
+[editable path="EnemyPrefab6"]
+[editable path="EnemyPrefab7"]
+[editable path="EnemyPrefab8"]
+[editable path="EnemyPrefab9"]

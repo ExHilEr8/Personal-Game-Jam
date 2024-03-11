@@ -1,5 +1,6 @@
 class_name Weapon extends Sprite2D
 
+@export var damage: float = float(1)
 @export var projectile_speed: float = float(550)
 @export var fire_rate: float = float(0.3)
 
@@ -45,11 +46,13 @@ func fire_projectile(speed: float):
 
 func fire_hitscan():
 	var space_state = get_world_2d().direct_space_state
+
+	# Draw raycast from end of gun to mouse
 	var bullet_raycast = PhysicsRayQueryParameters2D.create($BulletInstancePoint.get_global_position(), get_global_mouse_position())
 	var result = space_state.intersect_ray(bullet_raycast)
 
-func on_enemy_hit(hit_position: Vector2, enemy: Node):
-	pass
+func on_enemy_hit(hit_position: Vector2, enemy: Node, projectile: Projectile):
+	enemy.take_damage(damage)
 
 func _timer_set_can_fire():
 	can_fire = true

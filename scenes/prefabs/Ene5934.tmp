@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3 uid="uid://bew6phnc4wfen"]
+
+[ext_resource type="Script" path="res://scenes/Enemy.gd" id="1_b72ut"]
+
+[node name="EnemyPrefab" type="CharacterBody2D" groups=["Enemy"]]
+motion_mode = 1
+script = ExtResource("1_b72ut")
+metadata/_edit_group_ = true
+
+[node name="Sprite2D" type="Sprite2D" parent="." groups=["Enemy"]]
+metadata/_edit_group_ = true
