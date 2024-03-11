@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://d2ubpcvlc0win"]
+
+[ext_resource type="Script" path="res://scenes/WeaponController.gd" id="1_rtqdb"]
+
+[node name="Weapon" type="Sprite2D"]
+script = ExtResource("1_rtqdb")
+
+[node name="BulletInstancePoint" type="Node2D" parent="."]

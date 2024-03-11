@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=3 uid="uid://b8qtky71h0ahg"]
+
+[ext_resource type="Script" path="res://scenes/prefabs/ProjectileAnimationEffect.gd" id="2_yo0sv"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_yjuti"]
+animations = []
+
+[node name="BulletEffectAnimation" type="AnimatedSprite2D"]
+sprite_frames = SubResource("SpriteFrames_yjuti")
+animation = &""
+script = ExtResource("2_yo0sv")
+
+[connection signal="animation_finished" from="." to="." method="_on_animation_finished"]

@@ -1,0 +1,16 @@
+[gd_scene load_steps=2 format=3 uid="uid://ye4wqb3ugxbr"]
+
+[ext_resource type="Script" path="res://scenes/Projectile.gd" id="1_ggd42"]
+
+[node name="Projectile" type="RigidBody2D" groups=["Projectile"]]
+lock_rotation = true
+continuous_cd = 1
+max_contacts_reported = 1
+contact_monitor = true
+script = ExtResource("1_ggd42")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]
