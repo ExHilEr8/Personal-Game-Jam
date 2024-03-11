@@ -2,7 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://dbwiyy32jjiv8" path="res://scenes/player/player.tscn" id="1_scfp7"]
 [ext_resource type="Script" path="res://scenes/WeaponContainer.gd" id="2_ex5qh"]
-[ext_resource type="PackedScene" uid="uid://id5go3a541wm" path="res://scenes/weapons/pistols/pistol.tscn" id="3_kep7m"]
+[ext_resource type="PackedScene" uid="uid://cv3jeqsihp3ey" path="res://scenes/weapons/assault_rifles/m4.tscn" id="3_tawrs"]
 [ext_resource type="Texture2D" uid="uid://8ba48ruimrsk" path="res://assets/sprites/tempplayer.png" id="4_c8107"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_vnd6t"]
@@ -15,8 +15,10 @@ size = Vector2(16, 32)
 [node name="WeaponContainer" type="Node2D" parent="Player"]
 script = ExtResource("2_ex5qh")
 
-[node name="Pistol" parent="Player/WeaponContainer" instance=ExtResource("3_kep7m")]
-position = Vector2(21, 1)
+[node name="Weapon" parent="Player/WeaponContainer" instance=ExtResource("3_tawrs")]
+position = Vector2(24, 4)
+projectile_speed = 1200.0
+fire_rate = 0.075
 
 [node name="Tempplayer" type="Sprite2D" parent="."]
 position = Vector2(77, 76)

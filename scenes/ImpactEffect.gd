@@ -15,11 +15,12 @@ func play_sound(sound: AudioStream, sound_position: Vector2, sound_volume: float
 	audio_stream_player.queue_free()
 
 # Instantiates a given scene with a AnimatedSprite2D node to play an animation at a given position (One Shot)
-func play_animation(impact_animator: PackedScene, animation_name: String, animation_position: Vector2):
+func play_animation(impact_animator: PackedScene, animation_name: String, animation_position: Vector2, animation_rotation):
 	var impact_instance = impact_animator.instantiate()
 	get_tree().get_root().add_child(impact_instance)
 
 	impact_instance.position = animation_position
+	impact_instance.rotation = animation_rotation
 	impact_instance.play(animation_name)
 
 	await(impact_instance.animation_finished)

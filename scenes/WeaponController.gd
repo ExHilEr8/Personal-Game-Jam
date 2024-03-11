@@ -1,4 +1,4 @@
-extends Sprite2D
+class_name Weapon extends Sprite2D
 
 @export var projectile_speed: float = float(550)
 @export var fire_rate: float = float(0.3)
