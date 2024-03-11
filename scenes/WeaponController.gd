@@ -2,10 +2,23 @@ class_name Weapon extends Sprite2D
 
 @export var projectile_speed: float = float(550)
 @export var fire_rate: float = float(0.3)
+
 @export var is_hitscan: bool = false
 @export var projectile: PackedScene
 
-var can_fire = true
+var can_fire = true :
+	get:
+		return can_fire
+	set(value):
+		can_fire = bool(value)
+
+var fire_rate_timer: Timer
+
+func _ready():
+	fire_rate_timer = Timer.new()
+	get_tree().get_root().add_child.call_deferred(fire_rate_timer)
+	fire_rate_timer.one_shot = true
+	fire_rate_timer.timeout.connect(_timer_set_can_fire)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
@@ -19,8 +32,7 @@ func check_firing():
 			fire_hitscan()
 
 		can_fire = false
-		await(get_tree().create_timer(fire_rate).timeout)
-		can_fire = true
+		fire_rate_timer.start(fire_rate)
 
 func fire_projectile(speed: float):
 	var projectile_instance = projectile.instantiate()
@@ -38,4 +50,7 @@ func fire_hitscan():
 
 func on_enemy_hit(hit_position: Vector2, enemy: Node):
 	pass
+
+func _timer_set_can_fire():
+	can_fire = true
 
