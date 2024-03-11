@@ -27,7 +27,7 @@ var can_fire = true :
 var fire_rate_timer: Timer
 var reload_timer: Timer
 var is_reloading = false
-var magazine_count: int = magazine_size
+var magazine_count: int
 
 func _ready():
 	fire_rate_timer = Timer.new()
@@ -40,18 +40,20 @@ func _ready():
 	reload_timer.one_shot = true
 	reload_timer.timeout.connect(_reload_timer_finished)
 
+	magazine_count = magazine_size 
+
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
-	check_firing()
-	check_reloading()
+	check_attempt_fire()
+	check_attempt_reload()
 
-func check_reloading():
+func check_attempt_reload():
 	if Input.is_action_just_pressed("reload") and reserve_ammo > 0 and magazine_count < magazine_size and is_reloading == false:
 		reload_timer.start(reload_time)
 		is_reloading = true
 		can_fire = false
 
-func check_firing():
+func check_attempt_fire():
 	if Input.is_action_pressed("primary_action") and can_fire == true:
 		if(is_hitscan == false):
 			fire_projectile(projectile_speed)
