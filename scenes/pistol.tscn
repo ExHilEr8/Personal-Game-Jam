@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://bqsven3245ab8"]
 
 [ext_resource type="Texture2D" uid="uid://db4ugxtwnbp6" path="res://assets/sprites/temppistol.png" id="1_kegjo"]
-[ext_resource type="Script" path="res://scripts/WeaponController.gd" id="2_khq8r"]
+[ext_resource type="Script" path="res://scenes/WeaponController.gd" id="2_khq8r"]
 
 [node name="Pistol" type="Sprite2D"]
 texture = ExtResource("1_kegjo")
