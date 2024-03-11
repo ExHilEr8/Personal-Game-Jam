@@ -30,15 +30,8 @@ var is_reloading = false
 var magazine_count: int
 
 func _ready():
-	fire_rate_timer = Timer.new()
-	get_tree().get_root().add_child.call_deferred(fire_rate_timer)
-	fire_rate_timer.one_shot = true
-	fire_rate_timer.timeout.connect(_fire_rate_timer_finished)
-
-	reload_timer = Timer.new()
-	get_tree().get_root().add_child.call_deferred(reload_timer)
-	reload_timer.one_shot = true
-	reload_timer.timeout.connect(_reload_timer_finished)
+	initialize_fire_rate_timer()
+	initialize_reload_timer()
 
 	magazine_count = magazine_size 
 
@@ -82,9 +75,6 @@ func fire_hitscan():
 	var bullet_raycast = PhysicsRayQueryParameters2D.create($BulletInstancePoint.get_global_position(), get_global_mouse_position())
 	var result = space_state.intersect_ray(bullet_raycast)
 
-func on_enemy_hit(hit_position: Vector2, enemy: Node, projectile: Projectile):
-	enemy.take_damage(damage)
-
 func _fire_rate_timer_finished():
 	can_fire = true
 
@@ -103,3 +93,18 @@ func _reload_timer_finished():
 
 	print("reloaded", magazine_count, "/", magazine_size)
 	print("reserve ammo", reserve_ammo)
+
+func initialize_fire_rate_timer():
+	fire_rate_timer = Timer.new()
+	get_tree().get_root().add_child.call_deferred(fire_rate_timer)
+	fire_rate_timer.one_shot = true
+	fire_rate_timer.timeout.connect(_fire_rate_timer_finished)
+
+func initialize_reload_timer():
+	reload_timer = Timer.new()
+	get_tree().get_root().add_child.call_deferred(reload_timer)
+	reload_timer.one_shot = true
+	reload_timer.timeout.connect(_reload_timer_finished)
+
+func on_enemy_hit(hit_position: Vector2, enemy: Node, projectile: Projectile):
+	enemy.take_damage(damage)
