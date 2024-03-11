@@ -1,6 +1,7 @@
 class_name Enemy extends CharacterBody2D
 
 @export_category("Stats")
+@export var max_health: float = float(100)
 @export var health: float = float(100):
 	get:
 		return health
@@ -9,8 +10,6 @@ class_name Enemy extends CharacterBody2D
 		health = clamp(health, 0, max_health)
 
 @export var despawn_on_death: bool = true
-
-var max_health = health
 
 signal took_damage(damage: float)
 signal took_lethal_damage()
