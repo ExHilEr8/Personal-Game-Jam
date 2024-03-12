@@ -21,7 +21,8 @@ script = ExtResource("2_ex5qh")
 position = Vector2(24, 4)
 damage = 5.0
 projectile_speed = 1200.0
-fire_rate = 0.075
+fire_rate = 0.1
+burst_amount = 3
 
 [node name="EnemyPrefab" parent="." instance=ExtResource("4_oagll")]
 position = Vector2(-95, 25)
