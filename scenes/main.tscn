@@ -1,7 +1,7 @@
 [gd_scene load_steps=7 format=3 uid="uid://dib3hnth51t1o"]
 
 [ext_resource type="PackedScene" uid="uid://dbwiyy32jjiv8" path="res://scenes/player/player.tscn" id="1_scfp7"]
-[ext_resource type="Script" path="res://scenes/WeaponContainer.gd" id="2_ex5qh"]
+[ext_resource type="Script" path="res://scenes/weapon_container.gd" id="2_ex5qh"]
 [ext_resource type="PackedScene" uid="uid://cv3jeqsihp3ey" path="res://scenes/weapons/assault_rifles/m4.tscn" id="3_tawrs"]
 [ext_resource type="Texture2D" uid="uid://8ba48ruimrsk" path="res://assets/sprites/tempplayer.png" id="4_c8107"]
 [ext_resource type="PackedScene" uid="uid://bew6phnc4wfen" path="res://scenes/prefabs/EnemyPrefab.tscn" id="4_oagll"]
@@ -18,11 +18,10 @@ height = 32.0
 script = ExtResource("2_ex5qh")
 
 [node name="Weapon" parent="Player/WeaponContainer" instance=ExtResource("3_tawrs")]
-position = Vector2(24, 4)
+position = Vector2(16, 4)
 damage = 5.0
 projectile_speed = 1200.0
 fire_rate = 0.1
-burst_amount = 3
 
 [node name="EnemyPrefab" parent="." instance=ExtResource("4_oagll")]
 position = Vector2(-95, 25)

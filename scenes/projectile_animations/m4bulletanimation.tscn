@@ -42,15 +42,12 @@ animations = [{
 "texture": SubResource("AtlasTexture_wgfke")
 }],
 "loop": false,
-"name": &"bulletimpact",
+"name": &"default",
 "speed": 5.0
 }]
 
 [node name="BulletEffectAnimation" type="AnimatedSprite2D"]
 sprite_frames = SubResource("SpriteFrames_415qa")
-animation = &"bulletimpact"
-frame = 4
-frame_progress = 1.0
 speed_scale = 3.0
 script = ExtResource("1_fju5b")
 

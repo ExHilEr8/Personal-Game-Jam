@@ -11,7 +11,7 @@ size = Vector2(3, 1)
 [node name="Projectile" type="RigidBody2D" groups=["Projectile"]]
 lock_rotation = true
 continuous_cd = 1
-max_contacts_reported = 1
+max_contacts_reported = 99
 contact_monitor = true
 script = ExtResource("1_famcw")
 impact_animator = ExtResource("2_juq4l")

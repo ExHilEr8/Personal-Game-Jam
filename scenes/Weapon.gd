@@ -19,10 +19,15 @@ class_name Weapon extends Sprite2D
 @export var projectile: PackedScene
 
 var burst_timer: Timer
-var fire_rate_timer: Timer
-var reload_timer: Timer
 var is_bursting = false
+
+# reload_timer is used to set the state of is_reloading
+# is_reloading is used to determine times when can_fire = false
+var reload_timer: Timer
 var is_reloading = false
+
+var fire_rate_timer: Timer
+
 var magazine_count: int
 
 var can_fire = true :
@@ -33,11 +38,10 @@ var can_fire = true :
 
 func _ready():
 	fire_rate_timer = initialize_general_timer(fire_rate_timer)
-
-	reload_timer = initialize_general_timer(reload_timer)
-	reload_timer.timeout.connect(_reload_timer_finished)
-
 	burst_timer = initialize_general_timer(burst_timer)
+	reload_timer = initialize_general_timer(reload_timer)
+
+	reload_timer.timeout.connect(_reload_timer_finished)
 
 	magazine_count = magazine_size 
 
@@ -48,9 +52,9 @@ func _process(delta):
 
 func check_attempt_reload():
 	if Input.is_action_just_pressed("reload") and reserve_ammo > 0 and magazine_count < magazine_size and is_reloading == false:
-		reload()
+		start_reload()
 
-func reload():
+func start_reload():
 	reload_timer.start(reload_time)
 	is_reloading = true
 
@@ -64,26 +68,30 @@ func fire():
 	if(can_fire == true):
 		if(is_hitscan == true):
 			fire_hitscan()
+
 		elif(is_burst_fire == true):
 			is_bursting = true
 
 			for n in (burst_amount):
 				determine_can_fire()
-				fire_projectile(projectile_speed)
+				fire_projectile(projectile, projectile_speed, $BulletInstancePoint.get_global_position())
 				burst_timer.start(burst_fire_rate)
 				await burst_timer.timeout
 			
 			is_bursting = false
+
 		else:
-			fire_projectile(projectile_speed)
+			fire_projectile(projectile, projectile_speed, $BulletInstancePoint.get_global_position())
 
 		fire_rate_timer.start(fire_rate)
 
-func fire_projectile(speed: float):
+# fire_projectile() uses the projectile: PackedScene which is generally provided
+#	in the editor per gun. See ProjectilePrefab.tscn for more info
+func fire_projectile(projectile_scene: PackedScene, speed: float, projectile_start_point: Vector2):
 	magazine_count -= 1
 
-	var projectile_instance = projectile.instantiate()
-	projectile_instance.position = $BulletInstancePoint.get_global_position()
+	var projectile_instance = projectile_scene.instantiate()
+	projectile_instance.position = projectile_start_point
 	projectile_instance.rotation = global_rotation
 	projectile_instance.apply_impulse(Vector2(speed, 0).rotated(global_rotation), Vector2())
 	get_tree().get_root().add_child(projectile_instance)
@@ -100,11 +108,15 @@ func fire_hitscan():
 	var result = space_state.intersect_ray(bullet_raycast)
 
 func _reload_timer_finished():
+	reload()
+
+func reload() -> void:
 	var amount_to_reload = magazine_size - magazine_count
 
 	if(amount_to_reload > reserve_ammo):
 		magazine_count += reserve_ammo
 		reserve_ammo = 0
+
 	else:
 		magazine_count += amount_to_reload
 		reserve_ammo -= amount_to_reload
@@ -129,12 +141,15 @@ func determine_can_fire():
 	if(is_reloading == true):
 		can_fire = false
 		return
+
 	elif(is_bursting == true):
 		can_fire = false
 		return
+
 	elif(magazine_count == 0):
 		can_fire = false
 		return
+		
 	elif(fire_rate_timer.time_left > 0):
 		can_fire = false
 		return

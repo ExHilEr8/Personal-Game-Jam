@@ -1,8 +1,11 @@
 class_name Projectile extends ImpactEffect
 
+@export_category("Projectile Stats")
+@export var is_piercing: bool = false
+
 @export_category("Animation")
 @export var impact_animator: PackedScene
-@export var animation_name: String = "bulletimpact"
+@export var animation_name: String = "default"
 
 @export_category("Audio")
 @export var impact_sound: AudioStream
