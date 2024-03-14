@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://scenes/Weapon.gd" id="1_4crjc"]
 [ext_resource type="Texture2D" uid="uid://djoccl10ixo2k" path="res://assets/sprites/m4.png" id="1_hvxti"]
-[ext_resource type="PackedScene" uid="uid://cm0aq0yd2skvp" path="res://scenes/projectiles/m4bullet.tscn" id="2_iilyh"]
+[ext_resource type="PackedScene" uid="uid://cm0aq0yd2skvp" path="res://scenes/physics_projectiles/m4bullet.tscn" id="2_iilyh"]
 
 [node name="Weapon" type="Sprite2D"]
 texture = ExtResource("1_hvxti")

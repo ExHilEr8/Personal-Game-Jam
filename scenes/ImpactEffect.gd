@@ -1,9 +1,9 @@
-class_name ImpactEffect extends RigidBody2D
+class_name ImpactEffect extends Node2D
 
 # Creates a new AudioStreamPlayer2D at a given location to play a sound (One Shot)
-func play_sound(sound: AudioStream, sound_position: Vector2, sound_volume: float, sound_attenuation: float):
+func play_sound(parent, sound: AudioStream, sound_position: Vector2, sound_volume: float, sound_attenuation: float):
 	var audio_stream_player = AudioStreamPlayer2D.new()
-	get_tree().get_root().add_child(audio_stream_player)
+	parent.add_child(audio_stream_player)
 	
 	audio_stream_player.stream = sound
 	audio_stream_player.position = sound_position
@@ -15,9 +15,9 @@ func play_sound(sound: AudioStream, sound_position: Vector2, sound_volume: float
 	audio_stream_player.queue_free()
 
 # Instantiates a given scene with a AnimatedSprite2D node to play an animation at a given position (One Shot)
-func play_animation(impact_animator: PackedScene, animation_name: String, animation_position: Vector2, animation_rotation):
+func play_animation(parent, impact_animator: PackedScene, animation_name: String, animation_position: Vector2, animation_rotation):
 	var impact_instance = impact_animator.instantiate()
-	get_tree().get_root().add_child(impact_instance)
+	parent.add_child(impact_instance)
 
 	impact_instance.position = animation_position
 	impact_instance.rotation = animation_rotation

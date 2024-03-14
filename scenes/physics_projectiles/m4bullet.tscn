@@ -1,6 +1,6 @@
 [gd_scene load_steps=6 format=3 uid="uid://cm0aq0yd2skvp"]
 
-[ext_resource type="Script" path="res://scenes/Projectile.gd" id="1_famcw"]
+[ext_resource type="Script" path="res://scenes/PhysicsProjectile.gd" id="1_mvj12"]
 [ext_resource type="PackedScene" uid="uid://cvv8wdprhevxn" path="res://scenes/projectile_animations/m4bulletanimation.tscn" id="2_juq4l"]
 [ext_resource type="Texture2D" uid="uid://tfqcnc4n5xkg" path="res://assets/sprites/arbullet.png" id="2_pfd3t"]
 [ext_resource type="AudioStream" uid="uid://c32xm70y8sshi" path="res://assets/audio/hitmarker.wav" id="3_qnwr5"]
@@ -9,15 +9,16 @@
 size = Vector2(3, 1)
 
 [node name="Projectile" type="RigidBody2D" groups=["Projectile"]]
+collision_layer = 8
 lock_rotation = true
 continuous_cd = 1
-max_contacts_reported = 99
+max_contacts_reported = 999
 contact_monitor = true
-script = ExtResource("1_famcw")
+script = ExtResource("1_mvj12")
 impact_animator = ExtResource("2_juq4l")
 impact_sound = ExtResource("3_qnwr5")
 sound_volume = -15.0
-sound_attenuation = 0.9
+sound_attenuation = 0.95
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture = ExtResource("2_pfd3t")
