@@ -2,13 +2,10 @@ class_name Weapon extends Sprite2D
 
 
 @export_category("Weapon Stats")
-@export var damage: float = float(1)
-@export var projectile_speed: float = float(550)
 @export var fire_rate: float = float(0.3)
 @export var reload_time: float = float(1)
 @export var magazine_size: int = int(30)
 @export var reserve_ammo: int = int(90)
-@export var ammo_per_shot: int = int(1)
 @export var is_burst_fire: bool = false
 @export var burst_amount: int = int(1)
 @export var burst_fire_rate: float = float(0.1)
@@ -22,6 +19,9 @@ class_name Weapon extends Sprite2D
 @export_category("Resources")
 @export var physics_projectile: PackedScene
 @export var hitscan_projectile: PackedScene
+
+var hitscan_raycast: RayCast2D
+var hitscan_projectile_instance
 
 var burst_timer: Timer
 var is_bursting = false
@@ -38,9 +38,6 @@ var magazine_count: int :
 		return magazine_count
 	set(value):
 		magazine_count = clamp(value, 0, 9223372036854775807)
-
-var hitscan_raycast: RayCast2D
-var hitscan_projectile_instance
 
 var can_fire = true :
 	get:
@@ -71,6 +68,7 @@ func _ready():
 	if(hitscan_projectile != null):
 		hitscan_projectile_instance = hitscan_projectile.instantiate()
 		add_child(hitscan_projectile_instance)
+		hitscan_projectile_instance.enemy_hit.connect(_on_enemy_hit)
 		
 		
 func initialize_raycast() -> RayCast2D:
@@ -115,7 +113,7 @@ func fire():
 				determine_can_fire()
 
 				if is_hitscan == false:
-					fire_projectile(physics_projectile, projectile_speed, $BulletInstancePoint.get_global_position())
+					fire_projectile(physics_projectile, $BulletInstancePoint.get_global_position())
 				else:
 					fire_hitscan(hitscan_raycast)
 
@@ -128,23 +126,23 @@ func fire():
 			fire_hitscan(hitscan_raycast)
 
 		else:
-			fire_projectile(physics_projectile, projectile_speed, $BulletInstancePoint.get_global_position())
+			fire_projectile(physics_projectile, $BulletInstancePoint.get_global_position())
 
 		fire_rate_timer.start(fire_rate)
 		print("fire", magazine_count, "/", magazine_size)
 
 # fire_projectile() uses the physics_projectile: PackedScene which is generally provided
 #	in the editor per gun. See PhysicsProjectilePrefab.tscn for more info
-func fire_projectile(projectile_scene: PackedScene, speed: float, projectile_start_point: Vector2):
+func fire_projectile(projectile_scene: PackedScene, projectile_start_point: Vector2):
 	var projectile_instance = projectile_scene.instantiate()
 	projectile_instance.position = projectile_start_point
 	projectile_instance.rotation = global_rotation
-	projectile_instance.apply_impulse(Vector2(speed, 0).rotated(global_rotation), Vector2())
+	projectile_instance.apply_impulse(Vector2(projectile_instance.projectile_speed, 0).rotated(global_rotation), Vector2())
 	get_tree().get_root().add_child(projectile_instance)
 
 	projectile_instance.enemy_hit.connect(_on_enemy_hit)
 
-	magazine_count -= ammo_per_shot
+	magazine_count -= projectile_instance.ammo_per_shot
 
 # fire_hitscan() uses the hitscan_projectile: PackedScene which is generally provided
 #	in the editor per gun. See HitscanProjectilePrefab.tscn for more info
@@ -156,7 +154,7 @@ func fire_hitscan(ray: RayCast2D):
 		hitscan_projectile_instance.on_collision(collider, collision_point, collision_rotation)
 		print(collider)
 		
-	magazine_count -= ammo_per_shot
+	magazine_count -= hitscan_projectile_instance.ammo_per_shot
 
 func _reload_timer_finished():
 	reload()
@@ -184,10 +182,12 @@ func initialize_general_timer() -> Timer:
 	return timer
 	
 func _on_enemy_hit(hit_position: Vector2, enemy: Node, projectile):
-	damage_enemy(damage, enemy)
-	projectile.queue_free()
+	damage_enemy(enemy, projectile.damage)
 
-func damage_enemy(damage, enemy) -> void:
+	if is_hitscan == false:
+		projectile.queue_free()
+
+func damage_enemy(enemy, damage) -> void:
 	enemy.take_damage(damage)
 
 func determine_can_fire():

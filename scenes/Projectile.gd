@@ -1,5 +1,9 @@
 class_name Projectile extends Node2D
 
+@export_category("Projectile Stats")
+@export var damage: float = float(1)
+@export var ammo_per_shot: int = int(1)
+
 @export_category("Animation")
 @export var impact_animator: PackedScene
 @export var animation_name: String = "default"

@@ -1,5 +1,8 @@
 class_name PhysicsProjectile extends Projectile
 
+@export_category("Projectile Stats")
+@export var projectile_speed: float = float(550)
+
 func _on_body_entered(body:Node):
 	var bullet_global_position = get_global_position()
 	var bullet_global_rotation
