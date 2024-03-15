@@ -1,6 +1,5 @@
 class_name Weapon extends Sprite2D
 
-
 @export_category("Weapon Stats")
 @export var fire_rate: float = float(0.3)
 @export var reload_time: float = float(1)
@@ -27,8 +26,8 @@ class_name Weapon extends Sprite2D
 @export var physics_projectile: PackedScene
 @export var hitscan_projectile: PackedScene
 
-var hitscan_raycast: RayCast2D
-var hitscan_projectile_instance
+var hitscan_raycasts = []
+var hitscan_projectile_instances = []
 
 var burst_timer: Timer
 var is_bursting = false
@@ -60,20 +59,25 @@ func _ready():
 	magazine_count = magazine_size 
 
 	if is_hitscan == true:
-		hitscan_raycast = initialize_raycast()
+		for n in projectile_count:
+			var temp_ray = initialize_raycast()
+			temp_ray.name = ("Hitscan Raycast%s") % [n]
 
-		# Hitscan instance position is relative to parent node
-		if(hitscan_custom_instance_point != Vector2(0,0)):
-			hitscan_raycast.position = hitscan_custom_instance_point
-		else:
-			hitscan_raycast.position = $BulletInstancePoint.get_position()
+			# Hitscan instance position is relative to parent node
+			if(hitscan_custom_instance_point != Vector2(0,0)):
+				temp_ray.position = hitscan_custom_instance_point
+			else:
+				temp_ray.position = $BulletInstancePoint.get_position()
 
-		add_child.call_deferred(hitscan_raycast)
+			hitscan_raycasts.append(temp_ray)
+			add_child.call_deferred(temp_ray)
 	
-	if(hitscan_projectile != null):
-		hitscan_projectile_instance = hitscan_projectile.instantiate()
-		add_child(hitscan_projectile_instance)
-		hitscan_projectile_instance.enemy_hit.connect(_on_enemy_hit)
+			var temp_projectile = hitscan_projectile.instantiate()
+			temp_projectile.name = ("Hitscan Projectile%s" % [n])
+
+			hitscan_projectile_instances.append(temp_projectile)
+			add_child(temp_projectile)
+			temp_projectile.enemy_hit.connect(_on_enemy_hit)
 		
 		
 func initialize_raycast() -> RayCast2D:
@@ -93,7 +97,8 @@ func _process(_delta):
 
 func _physics_process(_delta):
 	if is_hitscan == true:
-		hitscan_raycast.target_position = Vector2(hitscan_ray_length, 0)
+		for ray in hitscan_raycasts:
+			ray.target_position = Vector2(hitscan_ray_length, 0)
 
 func check_attempt_reload():
 	if Input.is_action_just_pressed("reload") and reserve_ammo > 0 and magazine_count < magazine_size and is_reloading == false:
@@ -121,7 +126,8 @@ func fire():
 					for p in projectile_count:
 						fire_projectile(physics_projectile, $BulletInstancePoint.get_global_position())
 				else:
-					fire_hitscan(hitscan_raycast)
+					for p in hitscan_raycasts.size():
+						fire_hitscan(hitscan_raycasts[n], hitscan_projectile_instances[n])
 
 				burst_timer.start(burst_fire_rate)
 				await burst_timer.timeout
@@ -129,7 +135,8 @@ func fire():
 			is_bursting = false
 
 		elif(is_hitscan == true):
-				fire_hitscan(hitscan_raycast)
+			for n in hitscan_raycasts.size():
+					fire_hitscan(hitscan_raycasts[n], hitscan_projectile_instances[n])
 
 		else:
 			for n in projectile_count:
@@ -157,19 +164,19 @@ func fire_projectile(projectile_scene: PackedScene, projectile_start_point: Vect
 
 # fire_hitscan() uses the hitscan_projectile: PackedScene which is generally provided
 #	in the editor per gun. See HitscanProjectilePrefab.tscn for more info
-func fire_hitscan(ray: RayCast2D):
+func fire_hitscan(ray: RayCast2D, projectile):
 	if(initial_accuracy < 1):
-		hitscan_raycast.target_position = hitscan_raycast.target_position.rotated(apply_accuracy(hitscan_raycast.get_global_rotation(), initial_accuracy))
-		hitscan_raycast.force_raycast_update()
+		ray.target_position = ray.target_position.rotated(apply_accuracy(ray.get_global_rotation(), initial_accuracy))
+		ray.force_raycast_update()
 
 	if ray.is_colliding():
 		var collider = ray.get_collider()
 		var collision_point = ray.get_collision_point()
 		var collision_rotation = get_global_rotation()
-		hitscan_projectile_instance.on_collision(collider, collision_point, collision_rotation)
+		projectile.on_collision(collider, collision_point, collision_rotation)
 		print(collider)
 		
-	magazine_count -= hitscan_projectile_instance.ammo_per_shot
+	magazine_count -= projectile.ammo_per_shot
 
 func _reload_timer_finished():
 	reload()
