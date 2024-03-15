@@ -15,6 +15,7 @@ class_name Weapon extends Sprite2D
 @export var is_burst_fire: bool = false
 @export var burst_amount: int = int(1)
 @export var burst_fire_rate: float = float(0.1)
+@export var projectile_count: int = int(1)
 
 @export_category("Misc")
 @export var is_hitscan: bool = false
@@ -32,8 +33,6 @@ var hitscan_projectile_instance
 var burst_timer: Timer
 var is_bursting = false
 
-# reload_timer is used to set the state of is_reloading
-# is_reloading is used to determine times when can_fire = false
 var reload_timer: Timer
 var is_reloading = false
 
@@ -119,7 +118,8 @@ func fire():
 				determine_can_fire()
 
 				if is_hitscan == false:
-					fire_projectile(physics_projectile, $BulletInstancePoint.get_global_position())
+					for p in projectile_count:
+						fire_projectile(physics_projectile, $BulletInstancePoint.get_global_position())
 				else:
 					fire_hitscan(hitscan_raycast)
 
@@ -129,10 +129,11 @@ func fire():
 			is_bursting = false
 
 		elif(is_hitscan == true):
-			fire_hitscan(hitscan_raycast)
+				fire_hitscan(hitscan_raycast)
 
 		else:
-			fire_projectile(physics_projectile, $BulletInstancePoint.get_global_position())
+			for n in projectile_count:
+				fire_projectile(physics_projectile, $BulletInstancePoint.get_global_position())
 
 		fire_rate_timer.start(fire_rate)
 		print("fire", magazine_count, "/", magazine_size)
