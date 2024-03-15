@@ -11,6 +11,7 @@ class_name Weapon extends Sprite2D
 		
 @export var magazine_size: int = int(30)
 @export var reserve_ammo: int = int(90)
+@export var is_full_auto: bool = true
 @export var is_burst_fire: bool = false
 @export var burst_amount: int = int(1)
 @export var burst_fire_rate: float = float(0.1)
@@ -22,6 +23,12 @@ class_name Weapon extends Sprite2D
 @export var hitscan_ray_length: float = float(2000)
 @export var hitscan_collision_mask: int = int(1)
 @export var hitscan_custom_instance_point: Vector2 = Vector2(0,0)
+@export var allow_queued_firing: bool = true
+@export var queue_firing_delay: float = float(0.1):
+	get:
+		return queue_firing_delay
+	set(value):
+		queue_firing_delay = clamp(value, 0, fire_rate)
 
 @export_category("Resources")
 @export var physics_projectile: PackedScene
@@ -37,6 +44,7 @@ var reload_timer: Timer
 var is_reloading = false
 
 var fire_rate_timer: Timer
+var fired_is_queued: bool = false
 
 var magazine_count: int :
 	get:
@@ -94,7 +102,11 @@ func initialize_raycast() -> RayCast2D:
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta):
-	check_attempt_fire()
+	if(is_full_auto):
+		check_attempt_full_fire()
+	else:
+		check_attempt_single_fire()
+
 	check_attempt_reload()
 
 func _physics_process(_delta):
@@ -110,13 +122,20 @@ func start_reload():
 	reload_timer.start(reload_time)
 	is_reloading = true
 
-func check_attempt_fire():
+func check_attempt_full_fire():
 	if Input.is_action_pressed("primary_action"):
-		if is_burst_fire == true:
-			burst_fire()
+		try_fire()
 
-		else:
-			regular_fire()
+func check_attempt_single_fire():
+	if Input.is_action_just_pressed("primary_action"):
+		try_fire()
+		
+func try_fire():
+	if is_burst_fire == true:
+		burst_fire()
+
+	else:
+		regular_fire()
 
 func regular_fire():
 	determine_can_fire()
@@ -231,6 +250,7 @@ func initialize_general_timer() -> Timer:
 	var timer = Timer.new()
 	get_tree().get_root().add_child.call_deferred(timer)
 	timer.one_shot = true
+	timer.autostart = false
 	return timer
 	
 func _on_enemy_hit(hit_position: Vector2, enemy: Node, projectile):
