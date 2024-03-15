@@ -22,7 +22,7 @@ script = ExtResource("2_ex5qh")
 
 [node name="Weapon" parent="Player/WeaponContainer" instance=ExtResource("3_tawrs")]
 position = Vector2(16, 4)
-projectile_speed = 550.0
+initial_accuracy = 0.95
 physics_projectile = ExtResource("4_y0fn3")
 hitscan_projectile = ExtResource("5_tdcqm")
 

@@ -4,6 +4,12 @@ class_name Weapon extends Sprite2D
 @export_category("Weapon Stats")
 @export var fire_rate: float = float(0.3)
 @export var reload_time: float = float(1)
+@export var initial_accuracy: float = float(1) :
+	get:
+		return initial_accuracy
+	set(value):
+		initial_accuracy = clamp(value, 0, 1)
+		
 @export var magazine_size: int = int(30)
 @export var reserve_ammo: int = int(90)
 @export var is_burst_fire: bool = false
@@ -82,11 +88,11 @@ func initialize_raycast() -> RayCast2D:
 	return raycast
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
+func _process(_delta):
 	check_attempt_fire()
 	check_attempt_reload()
 
-func _physics_process(delta):
+func _physics_process(_delta):
 	if is_hitscan == true:
 		hitscan_raycast.target_position = Vector2(hitscan_ray_length, 0)
 
@@ -131,13 +137,17 @@ func fire():
 		fire_rate_timer.start(fire_rate)
 		print("fire", magazine_count, "/", magazine_size)
 
+func apply_accuracy(initial_rotation, accuracy: float) -> float:
+	var rad_offset = PI * (1 - accuracy) 
+	return randf_range(initial_rotation - rad_offset, initial_rotation + rad_offset)
+
 # fire_projectile() uses the physics_projectile: PackedScene which is generally provided
 #	in the editor per gun. See PhysicsProjectilePrefab.tscn for more info
 func fire_projectile(projectile_scene: PackedScene, projectile_start_point: Vector2):
 	var projectile_instance = projectile_scene.instantiate()
 	projectile_instance.position = projectile_start_point
-	projectile_instance.rotation = global_rotation
-	projectile_instance.apply_impulse(Vector2(projectile_instance.projectile_speed, 0).rotated(global_rotation), Vector2())
+	projectile_instance.rotation = apply_accuracy(get_global_rotation(), initial_accuracy)
+	projectile_instance.apply_impulse(Vector2(projectile_instance.projectile_speed, 0).rotated(projectile_instance.rotation), Vector2())
 	get_tree().get_root().add_child(projectile_instance)
 
 	projectile_instance.enemy_hit.connect(_on_enemy_hit)
@@ -147,6 +157,10 @@ func fire_projectile(projectile_scene: PackedScene, projectile_start_point: Vect
 # fire_hitscan() uses the hitscan_projectile: PackedScene which is generally provided
 #	in the editor per gun. See HitscanProjectilePrefab.tscn for more info
 func fire_hitscan(ray: RayCast2D):
+	if(initial_accuracy < 1):
+		hitscan_raycast.target_position = hitscan_raycast.target_position.rotated(apply_accuracy(hitscan_raycast.get_global_rotation(), initial_accuracy))
+		hitscan_raycast.force_raycast_update()
+
 	if ray.is_colliding():
 		var collider = ray.get_collider()
 		var collision_point = ray.get_collision_point()
