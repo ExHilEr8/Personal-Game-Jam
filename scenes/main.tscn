@@ -23,8 +23,11 @@ script = ExtResource("2_ex5qh")
 [node name="Weapon" parent="Player/WeaponContainer" instance=ExtResource("3_tawrs")]
 position = Vector2(16, 4)
 initial_accuracy = 0.95
-reserve_ammo = 900
-projectile_count = 10
+magazine_size = 9000
+reserve_ammo = 9000
+is_burst_fire = true
+burst_amount = 3
+projectile_count = 5
 is_hitscan = true
 physics_projectile = ExtResource("4_y0fn3")
 hitscan_projectile = ExtResource("5_tdcqm")

@@ -15,6 +15,7 @@ class_name Weapon extends Sprite2D
 @export var burst_amount: int = int(1)
 @export var burst_fire_rate: float = float(0.1)
 @export var projectile_count: int = int(1)
+@export var projectile_even_spread: bool = false
 
 @export_category("Misc")
 @export var is_hitscan: bool = false
@@ -48,6 +49,7 @@ var can_fire = true :
 		return can_fire
 	set(value):
 		can_fire = bool(value)
+		
 
 func _ready():
 	fire_rate_timer = initialize_general_timer()
@@ -110,40 +112,68 @@ func start_reload():
 
 func check_attempt_fire():
 	if Input.is_action_pressed("primary_action"):
-		fire()
+		if is_burst_fire == true:
+			burst_fire()
 
-func fire():
+		else:
+			regular_fire()
+
+func regular_fire():
 	determine_can_fire()
 
 	if(can_fire == true):
-		if(is_burst_fire == true):
-			is_bursting = true
+		shoot()
 
-			for n in (burst_amount):
-				determine_can_fire()
+func burst_fire():
+	determine_can_fire()
+	
+	if(can_fire == true):
+		is_bursting = true
 
-				if is_hitscan == false:
-					for p in projectile_count:
-						fire_projectile(physics_projectile, $BulletInstancePoint.get_global_position())
-				else:
-					for p in hitscan_raycasts.size():
-						fire_hitscan(hitscan_raycasts[n], hitscan_projectile_instances[n])
+		for n in (burst_amount):
+			shoot()
 
-				burst_timer.start(burst_fire_rate)
-				await burst_timer.timeout
+			burst_timer.start(burst_fire_rate)
+			await burst_timer.timeout
+		
+		is_bursting = false
+
+func shoot():
+	var spread_increment = (PI * (1 - initial_accuracy)) / projectile_count
+
+	var initial_rotation
+
+	if is_hitscan == true:
+		# Uses the first hitscan_raycast in the array since they should all be aligned,
+		#	circumstantial to the _physics_process() function
+		initial_rotation = hitscan_raycasts[0].rotation
+	else:
+		initial_rotation = get_global_rotation()
+
+	# Subtracts half of the entire width of the spread from the initial_rotation to determine
+	#	the starting point for the spread, and then rotates down with each subsequent projectile
+	var rotation_param = initial_rotation - ((PI * (1 - initial_accuracy)) / 2)
+
+	if(is_hitscan == true):
+		for n in hitscan_raycasts.size():
+			if projectile_even_spread == true:
+				fire_hitscan(hitscan_raycasts[n], hitscan_projectile_instances[n], rotation_param)
+				rotation_param += spread_increment
+			else:
+				fire_hitscan(hitscan_raycasts[n], hitscan_projectile_instances[n], apply_accuracy(hitscan_raycasts[n].rotation, initial_accuracy))
+
+	else:
+		for n in projectile_count:
+			if projectile_even_spread == true:
+				fire_projectile(physics_projectile, $BulletInstancePoint.get_global_position(), rotation_param)
+				rotation_param += spread_increment
+			else:
+				fire_projectile(physics_projectile, $BulletInstancePoint.get_global_position(), apply_accuracy(get_global_rotation(), initial_accuracy))
 			
-			is_bursting = false
 
-		elif(is_hitscan == true):
-			for n in hitscan_raycasts.size():
-					fire_hitscan(hitscan_raycasts[n], hitscan_projectile_instances[n])
+	fire_rate_timer.start(fire_rate)
+	print("fire", magazine_count, "/", magazine_size)
 
-		else:
-			for n in projectile_count:
-				fire_projectile(physics_projectile, $BulletInstancePoint.get_global_position())
-
-		fire_rate_timer.start(fire_rate)
-		print("fire", magazine_count, "/", magazine_size)
 
 func apply_accuracy(initial_rotation, accuracy: float) -> float:
 	var rad_offset = PI * (1 - accuracy) 
@@ -151,10 +181,10 @@ func apply_accuracy(initial_rotation, accuracy: float) -> float:
 
 # fire_projectile() uses the physics_projectile: PackedScene which is generally provided
 #	in the editor per gun. See PhysicsProjectilePrefab.tscn for more info
-func fire_projectile(projectile_scene: PackedScene, projectile_start_point: Vector2):
+func fire_projectile(projectile_scene: PackedScene, projectile_start_point: Vector2, projectile_rotation: float):
 	var projectile_instance = projectile_scene.instantiate()
 	projectile_instance.position = projectile_start_point
-	projectile_instance.rotation = apply_accuracy(get_global_rotation(), initial_accuracy)
+	projectile_instance.rotation = projectile_rotation
 	projectile_instance.apply_impulse(Vector2(projectile_instance.projectile_speed, 0).rotated(projectile_instance.rotation), Vector2())
 	get_tree().get_root().add_child(projectile_instance)
 
@@ -164,9 +194,9 @@ func fire_projectile(projectile_scene: PackedScene, projectile_start_point: Vect
 
 # fire_hitscan() uses the hitscan_projectile: PackedScene which is generally provided
 #	in the editor per gun. See HitscanProjectilePrefab.tscn for more info
-func fire_hitscan(ray: RayCast2D, projectile):
+func fire_hitscan(ray: RayCast2D, projectile, projectile_rotation: float):
 	if(initial_accuracy < 1):
-		ray.target_position = ray.target_position.rotated(apply_accuracy(ray.get_global_rotation(), initial_accuracy))
+		ray.target_position = ray.target_position.rotated(projectile_rotation)
 		ray.force_raycast_update()
 
 	if ray.is_colliding():
@@ -175,7 +205,7 @@ func fire_hitscan(ray: RayCast2D, projectile):
 		var collision_rotation = get_global_rotation()
 		projectile.on_collision(collider, collision_point, collision_rotation)
 		print(collider)
-		
+	
 	magazine_count -= projectile.ammo_per_shot
 
 func _reload_timer_finished():
