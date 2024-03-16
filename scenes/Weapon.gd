@@ -173,6 +173,10 @@ func shoot():
 	#	the starting point for the spread, and then rotates down with each subsequent projectile
 	var rotation_param = initial_rotation - ((PI * (1 - initial_accuracy)) / 2)
 
+	# Not sure why but the rotation_param needs to be adjusted by half of a spread increment to
+	#	align properly, otherwise it shoots too far counter clockwise
+	rotation_param += spread_increment / 2
+
 	if(is_hitscan == true):
 		for n in hitscan_raycasts.size():
 			if projectile_even_spread == true:
