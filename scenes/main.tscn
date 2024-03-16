@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://dib3hnth51t1o"]
+[gd_scene load_steps=10 format=3 uid="uid://dib3hnth51t1o"]
 
 [ext_resource type="PackedScene" uid="uid://dbwiyy32jjiv8" path="res://scenes/player/player.tscn" id="1_scfp7"]
 [ext_resource type="Script" path="res://scenes/weapon_container.gd" id="2_ex5qh"]
@@ -12,6 +12,9 @@
 radius = 8.0
 height = 32.0
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_d5o85"]
+size = Vector2(15, 71)
+
 [node name="Main" type="Node2D"]
 
 [node name="Player" parent="." instance=ExtResource("1_scfp7")]
@@ -23,30 +26,47 @@ script = ExtResource("2_ex5qh")
 [node name="Weapon" parent="Player/WeaponContainer" instance=ExtResource("3_tawrs")]
 position = Vector2(16, 4)
 fire_rate = 0.05
-initial_accuracy = 0.95
 magazine_size = 9000
 reserve_ammo = 9000
-is_full_auto = false
-is_burst_fire = true
-burst_amount = 3
-burst_fire_rate = 0.2
-projectile_count = 3
+is_hitscan = true
 queue_firing_delay = 0.0
 physics_projectile = ExtResource("4_y0fn3")
 hitscan_projectile = ExtResource("5_tdcqm")
 
-[node name="EnemyPrefab" parent="." instance=ExtResource("4_oagll")]
+[node name="EnemyInFront" parent="." instance=ExtResource("4_oagll")]
 
-[node name="Sprite2D" parent="EnemyPrefab" index="0"]
+[node name="Sprite2D" parent="EnemyInFront" index="0"]
 self_modulate = Color(1, 0.466667, 0.415686, 1)
 texture = ExtResource("4_c8107")
 
-[node name="FloatingUIContainer" parent="EnemyPrefab" index="1"]
+[node name="FloatingUIContainer" parent="EnemyInFront" index="1"]
 position = Vector2(0, -20)
 metadata/_edit_group_ = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyPrefab"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyInFront"]
 shape = SubResource("CapsuleShape2D_f2dak")
 
+[node name="EnemyInBack" parent="." instance=ExtResource("4_oagll")]
+position = Vector2(168, 0)
+
+[node name="Sprite2D" parent="EnemyInBack" index="0"]
+self_modulate = Color(1, 0.466667, 0.415686, 1)
+texture = ExtResource("4_c8107")
+
+[node name="FloatingUIContainer" parent="EnemyInBack" index="1"]
+position = Vector2(0, -20)
+metadata/_edit_group_ = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyInBack"]
+shape = SubResource("CapsuleShape2D_f2dak")
+
+[node name="Wall" type="StaticBody2D" parent="." groups=["Wall"]]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Wall" groups=["Wall"]]
+position = Vector2(84, 2)
+shape = SubResource("RectangleShape2D_d5o85")
+debug_color = Color(0.913725, 0.290196, 0, 0.419608)
+
 [editable path="Player/WeaponContainer/Weapon"]
-[editable path="EnemyPrefab"]
+[editable path="EnemyInFront"]
+[editable path="EnemyInBack"]

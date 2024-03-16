@@ -220,14 +220,31 @@ func fire_projectile(projectile_scene: PackedScene, projectile_start_point: Vect
 func fire_hitscan(ray: RayCast2D, projectile, projectile_rotation: float):
 	if(initial_accuracy < 1):
 		ray.target_position = ray.target_position.rotated(projectile_rotation)
+
+	var check_next = true
+
+	# Checks multiple ray collisions when 
+	while check_next == true:
 		ray.force_raycast_update()
 
-	if ray.is_colliding():
-		var collider = ray.get_collider()
-		var collision_point = ray.get_collision_point()
-		var collision_rotation = get_global_rotation()
-		projectile.on_collision(collider, collision_point, collision_rotation)
-		print(collider)
+		if ray.is_colliding():
+			var collider = ray.get_collider()
+			var collision_point = ray.get_collision_point()
+			var collision_rotation = get_global_rotation()
+			projectile.on_collision(collider, collision_point, collision_rotation)
+			print(collider)
+		
+			if (collider.is_in_group("Enemy") and projectile.is_enemy_piercing) or (collider.is_in_group("Wall") and projectile.is_wall_piercing):
+				check_next = true
+				ray.add_exception(collider)
+				
+			else:
+				check_next = false
+
+		else:
+			check_next = false
+	
+	ray.clear_exceptions()
 	
 	magazine_count -= projectile.ammo_per_shot
 
