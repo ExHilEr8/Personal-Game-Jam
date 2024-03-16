@@ -212,6 +212,7 @@ func fire_projectile(projectile_scene: PackedScene, projectile_start_point: Vect
 	get_tree().get_root().add_child(projectile_instance)
 
 	projectile_instance.enemy_hit.connect(_on_enemy_hit)
+	projectile_instance.wall_hit.connect(_on_wall_hit)
 
 	magazine_count -= projectile_instance.ammo_per_shot
 
@@ -222,8 +223,6 @@ func fire_hitscan(ray: RayCast2D, projectile, projectile_rotation: float):
 		ray.target_position = ray.target_position.rotated(projectile_rotation)
 
 	var check_next = true
-
-	# Checks multiple ray collisions when 
 	while check_next == true:
 		ray.force_raycast_update()
 
@@ -277,6 +276,10 @@ func initialize_general_timer() -> Timer:
 func _on_enemy_hit(hit_position: Vector2, enemy: Node, projectile):
 	damage_enemy(enemy, projectile.damage)
 
+	if is_hitscan == false:
+		projectile.queue_free()
+
+func _on_wall_hit(hit_position: Vector2, enemy: Node, projectile):
 	if is_hitscan == false:
 		projectile.queue_free()
 

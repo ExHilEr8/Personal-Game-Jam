@@ -16,6 +16,7 @@ max_contacts_reported = 999
 contact_monitor = true
 script = ExtResource("1_mvj12")
 projectile_speed = 1200.0
+play_effect_on_wall = true
 impact_animator = ExtResource("2_juq4l")
 impact_sound = ExtResource("3_qnwr5")
 sound_volume = -15.0
