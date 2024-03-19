@@ -5,7 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://tfqcnc4n5xkg" path="res://assets/sprites/arbullet.png" id="2_pfd3t"]
 [ext_resource type="AudioStream" uid="uid://c32xm70y8sshi" path="res://assets/audio/hitmarker.wav" id="3_qnwr5"]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_57cu1"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_rupa6"]
 size = Vector2(3, 1)
 
 [node name="Projectile" type="RigidBody2D" node_paths=PackedStringArray("collider") groups=["Projectile"]]
@@ -28,6 +28,6 @@ sound_attenuation = 0.95
 texture = ExtResource("2_pfd3t")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-shape = SubResource("RectangleShape2D_57cu1")
+shape = SubResource("RectangleShape2D_rupa6")
 
 [connection signal="body_entered" from="." to="." method="_on_body_entered"]

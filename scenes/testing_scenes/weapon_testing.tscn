@@ -3,7 +3,7 @@
 [ext_resource type="PackedScene" uid="uid://dbwiyy32jjiv8" path="res://scenes/player/player.tscn" id="1_tgmxy"]
 [ext_resource type="Script" path="res://scenes/weapon_container.gd" id="2_xvo12"]
 [ext_resource type="PackedScene" uid="uid://cv3jeqsihp3ey" path="res://scenes/weapons/assault_rifles/m4.tscn" id="3_5a638"]
-[ext_resource type="PackedScene" uid="uid://qdgpx6n8ryg2" path="res://scenes/physics_projectiles/piercingm4bullet.tscn" id="4_x2js2"]
+[ext_resource type="PackedScene" uid="uid://cm0aq0yd2skvp" path="res://scenes/physics_projectiles/m4bullet.tscn" id="4_cxa28"]
 [ext_resource type="PackedScene" uid="uid://d2hqsdb4xswu5" path="res://scenes/prefabs/HitscanProjectilePrefab.tscn" id="5_txgtt"]
 [ext_resource type="PackedScene" uid="uid://bew6phnc4wfen" path="res://scenes/prefabs/EnemyPrefab.tscn" id="6_3freg"]
 [ext_resource type="Texture2D" uid="uid://8ba48ruimrsk" path="res://assets/sprites/tempplayer.png" id="7_ml2a3"]
@@ -29,9 +29,8 @@ position = Vector2(16, 4)
 fire_rate = 0.05
 magazine_size = 9000
 reserve_ammo = 9000
-is_hitscan = true
 queue_firing_delay = 0.0
-physics_projectile = ExtResource("4_x2js2")
+physics_projectile = ExtResource("4_cxa28")
 hitscan_projectile = ExtResource("5_txgtt")
 
 [node name="SceneObjects" type="Node2D" parent="."]
@@ -99,6 +98,46 @@ position = Vector2(156, 0)
 collision_layer = 16
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="SceneObjects/Wall2" groups=["Wall"]]
+position = Vector2(84, 2)
+shape = SubResource("RectangleShape2D_q0hqs")
+debug_color = Color(0.913725, 0.290196, 0, 0.419608)
+
+[node name="Box" type="Node2D" parent="SceneObjects"]
+
+[node name="Wall3" type="StaticBody2D" parent="SceneObjects/Box" groups=["Wall"]]
+position = Vector2(27, -108)
+collision_layer = 16
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SceneObjects/Box/Wall3" groups=["Wall"]]
+position = Vector2(84, 2)
+shape = SubResource("RectangleShape2D_q0hqs")
+debug_color = Color(0.913725, 0.290196, 0, 0.419608)
+
+[node name="Wall4" type="StaticBody2D" parent="SceneObjects/Box" groups=["Wall"]]
+position = Vector2(151, -162)
+rotation = 1.5708
+collision_layer = 16
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SceneObjects/Box/Wall4" groups=["Wall"]]
+position = Vector2(84, 2)
+shape = SubResource("RectangleShape2D_q0hqs")
+debug_color = Color(0.913725, 0.290196, 0, 0.419608)
+
+[node name="Wall6" type="StaticBody2D" parent="SceneObjects/Box" groups=["Wall"]]
+position = Vector2(151, -218)
+rotation = 1.5708
+collision_layer = 16
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SceneObjects/Box/Wall6" groups=["Wall"]]
+position = Vector2(84, 2)
+shape = SubResource("RectangleShape2D_q0hqs")
+debug_color = Color(0.913725, 0.290196, 0, 0.419608)
+
+[node name="Wall5" type="StaticBody2D" parent="SceneObjects/Box" groups=["Wall"]]
+position = Vector2(102, -108)
+collision_layer = 16
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SceneObjects/Box/Wall5" groups=["Wall"]]
 position = Vector2(84, 2)
 shape = SubResource("RectangleShape2D_q0hqs")
 debug_color = Color(0.913725, 0.290196, 0, 0.419608)
