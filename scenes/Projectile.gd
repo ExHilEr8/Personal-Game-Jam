@@ -23,7 +23,9 @@ class_name Projectile extends Node2D
 var impact_effect: ImpactEffect = ImpactEffect.new()
 
 signal enemy_hit(position: Vector2, enemy: Node, projectile)
+signal enemy_exit(position: Vector2, enemy: Node, projectile)
 signal wall_hit(position: Vector2, wall: Node, projectile)
+signal wall_exit(position: Vector2, wall: Node, projectile)
 
 func determine_projectile_interaction(parent, body: Node, bullet_global_position: Vector2, bullet_global_rotation: float):
 	if body.is_in_group("Enemy"):
@@ -36,7 +38,7 @@ func on_hit_effect(parent, hit_position, hit_rotation):
 	if(impact_animator != null):
 		impact_effect.play_animation(parent, impact_animator, animation_name, hit_position, hit_rotation)
 
-	if(impact_sound != null):	
+	if(impact_sound != null):
 		impact_effect.play_sound(parent, impact_sound, hit_position, sound_volume, sound_attenuation)
 
 # parent variable is included to allow instantiating animations and sounds under

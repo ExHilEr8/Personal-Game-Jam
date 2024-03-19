@@ -8,19 +8,16 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_57cu1"]
 size = Vector2(3, 1)
 
-[node name="Projectile" type="RigidBody2D" node_paths=PackedStringArray("collider", "area_collider") groups=["Projectile"]]
+[node name="Projectile" type="RigidBody2D" node_paths=PackedStringArray("collider") groups=["Projectile"]]
 collision_layer = 8
-collision_mask = 0
+collision_mask = 17
 lock_rotation = true
 continuous_cd = 1
 max_contacts_reported = 999
 contact_monitor = true
 script = ExtResource("1_maeli")
 collider = NodePath(".")
-area_collider = NodePath("Area2D")
-projectile_speed = 400.0
-is_enemy_piercing = true
-is_wall_piercing = true
+projectile_speed = 1200.0
 play_effect_on_enemy = true
 play_effect_on_wall = true
 impact_animator = ExtResource("2_lv85q")
@@ -34,12 +31,5 @@ texture = ExtResource("4_4vfxk")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_57cu1")
 
-[node name="Area2D" type="Area2D" parent="."]
-collision_layer = 8
-collision_mask = 17
-
-[node name="CollisionShape2DDuplicate" type="CollisionShape2D" parent="Area2D"]
-shape = SubResource("RectangleShape2D_57cu1")
-
 [connection signal="body_entered" from="." to="." method="_on_body_entered"]
-[connection signal="body_entered" from="Area2D" to="." method="_on_body_entered"]
+[connection signal="body_exited" from="." to="." method="_on_body_exited"]

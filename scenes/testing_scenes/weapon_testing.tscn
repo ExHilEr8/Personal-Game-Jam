@@ -29,51 +29,81 @@ position = Vector2(16, 4)
 fire_rate = 0.05
 magazine_size = 9000
 reserve_ammo = 9000
+is_hitscan = true
 queue_firing_delay = 0.0
 physics_projectile = ExtResource("4_x2js2")
 hitscan_projectile = ExtResource("5_txgtt")
 
-[node name="EnemyInFront" parent="." instance=ExtResource("6_3freg")]
+[node name="SceneObjects" type="Node2D" parent="."]
 
-[node name="Sprite2D" parent="EnemyInFront" index="0"]
+[node name="EnemyInFront" parent="SceneObjects" instance=ExtResource("6_3freg")]
+
+[node name="Sprite2D" parent="SceneObjects/EnemyInFront" index="0"]
 self_modulate = Color(1, 0.466667, 0.415686, 1)
 texture = ExtResource("7_ml2a3")
 
-[node name="FloatingUIContainer" parent="EnemyInFront" index="1"]
+[node name="FloatingUIContainer" parent="SceneObjects/EnemyInFront" index="1"]
 position = Vector2(0, -20)
 metadata/_edit_group_ = true
 
-[node name="Label" parent="EnemyInFront/FloatingUIContainer" index="0"]
+[node name="Label" parent="SceneObjects/EnemyInFront/FloatingUIContainer" index="0"]
 metadata/_edit_use_anchors_ = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyInFront"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SceneObjects/EnemyInFront"]
 shape = SubResource("CapsuleShape2D_c4648")
 
-[node name="EnemyInBack" parent="." instance=ExtResource("6_3freg")]
+[node name="EnemyInMiddle" parent="SceneObjects" instance=ExtResource("6_3freg")]
 position = Vector2(168, 0)
 
-[node name="Sprite2D" parent="EnemyInBack" index="0"]
+[node name="Sprite2D" parent="SceneObjects/EnemyInMiddle" index="0"]
 self_modulate = Color(1, 0.466667, 0.415686, 1)
 texture = ExtResource("7_ml2a3")
 
-[node name="FloatingUIContainer" parent="EnemyInBack" index="1"]
+[node name="FloatingUIContainer" parent="SceneObjects/EnemyInMiddle" index="1"]
 position = Vector2(0, -20)
 metadata/_edit_group_ = true
 
-[node name="Label" parent="EnemyInBack/FloatingUIContainer" index="0"]
+[node name="Label" parent="SceneObjects/EnemyInMiddle/FloatingUIContainer" index="0"]
 metadata/_edit_use_anchors_ = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyInBack"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SceneObjects/EnemyInMiddle"]
 shape = SubResource("CapsuleShape2D_c4648")
 
-[node name="Wall" type="StaticBody2D" parent="." groups=["Wall"]]
+[node name="EnemyInBack" parent="SceneObjects" instance=ExtResource("6_3freg")]
+position = Vector2(300, 0)
+
+[node name="Sprite2D" parent="SceneObjects/EnemyInBack" index="0"]
+self_modulate = Color(1, 0.466667, 0.415686, 1)
+texture = ExtResource("7_ml2a3")
+
+[node name="FloatingUIContainer" parent="SceneObjects/EnemyInBack" index="1"]
+position = Vector2(0, -20)
+metadata/_edit_group_ = true
+
+[node name="Label" parent="SceneObjects/EnemyInBack/FloatingUIContainer" index="0"]
+metadata/_edit_use_anchors_ = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SceneObjects/EnemyInBack"]
+shape = SubResource("CapsuleShape2D_c4648")
+
+[node name="Wall" type="StaticBody2D" parent="SceneObjects" groups=["Wall"]]
 collision_layer = 16
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Wall" groups=["Wall"]]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SceneObjects/Wall" groups=["Wall"]]
+position = Vector2(84, 2)
+shape = SubResource("RectangleShape2D_q0hqs")
+debug_color = Color(0.913725, 0.290196, 0, 0.419608)
+
+[node name="Wall2" type="StaticBody2D" parent="SceneObjects" groups=["Wall"]]
+position = Vector2(156, 0)
+collision_layer = 16
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SceneObjects/Wall2" groups=["Wall"]]
 position = Vector2(84, 2)
 shape = SubResource("RectangleShape2D_q0hqs")
 debug_color = Color(0.913725, 0.290196, 0, 0.419608)
 
 [editable path="Player/WeaponContainer/Weapon"]
-[editable path="EnemyInFront"]
-[editable path="EnemyInBack"]
+[editable path="SceneObjects/EnemyInFront"]
+[editable path="SceneObjects/EnemyInMiddle"]
+[editable path="SceneObjects/EnemyInBack"]

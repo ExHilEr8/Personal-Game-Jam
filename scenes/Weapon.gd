@@ -211,7 +211,9 @@ func fire_projectile(projectile_scene: PackedScene, projectile_start_point: Vect
 	get_tree().get_root().add_child(projectile_instance)
 
 	projectile_instance.enemy_hit.connect(_on_enemy_hit)
+	projectile_instance.enemy_exit.connect(_on_enemy_exit)
 	projectile_instance.wall_hit.connect(_on_wall_hit)
+	projectile_instance.wall_exit.connect(_on_wall_exit)
 
 	magazine_count -= projectile_instance.ammo_per_shot
 
@@ -275,12 +277,28 @@ func initialize_general_timer() -> Timer:
 func _on_enemy_hit(hit_position: Vector2, enemy: Node, projectile):
 	damage_enemy(enemy, projectile.damage)
 
-	if is_hitscan == false and projectile.is_enemy_piercing == false:
-		projectile.queue_free()
+	if is_hitscan == false:
+		if projectile.is_enemy_piercing == false:
+			projectile.queue_free()
+		elif projectile.is_enemy_piercing == true:
+			projectile.collider.add_collision_exception_with(enemy)
+			projectile.collider.linear_velocity = Vector2(projectile.projectile_speed, 0).rotated(projectile.get_global_rotation())
+
+func _on_enemy_exit(hit_position: Vector2, enemy: Node, projectile):
+	if is_hitscan == false and projectile.is_enemy_piercing == true:
+		projectile.collider.remove_collision_exception_with(enemy)
 
 func _on_wall_hit(hit_position: Vector2, wall: Node, projectile):
-	if is_hitscan == false and not projectile.is_wall_piercing:
-		projectile.queue_free()
+	if is_hitscan == false:
+		if projectile.is_wall_piercing == false:
+			projectile.queue_free()
+		elif projectile.is_wall_piercing == true:
+			projectile.collider.add_collision_exception_with(wall)
+			projectile.collider.linear_velocity = Vector2(projectile.projectile_speed, 0).rotated(projectile.get_global_rotation())
+	
+func _on_wall_exit(hit_position: Vector2, wall: Node, projectile):
+	if is_hitscan == false and projectile.is_wall_piercing == true:
+		projectile.collider.remove_collision_exception_with(wall)
 
 func damage_enemy(enemy, damage) -> void:
 	enemy.take_damage(damage)

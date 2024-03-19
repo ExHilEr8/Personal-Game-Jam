@@ -86,9 +86,10 @@ reload={
 [layer_names]
 
 2d_physics/layer_1="Enemy"
+2d_physics/layer_2="EnemyProjectile"
 2d_physics/layer_3="Player"
-2d_physics/layer_4="Player Projectile"
-2d_physics/layer_5="EnvironmentBound"
+2d_physics/layer_4="PlayerProjectile"
+2d_physics/layer_5="Wall"
 
 [physics]
 
