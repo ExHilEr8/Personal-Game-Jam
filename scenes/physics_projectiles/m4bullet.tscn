@@ -8,14 +8,16 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_57cu1"]
 size = Vector2(3, 1)
 
-[node name="Projectile" type="RigidBody2D" groups=["Projectile"]]
+[node name="Projectile" type="RigidBody2D" node_paths=PackedStringArray("collider") groups=["Projectile"]]
 collision_layer = 8
+collision_mask = 17
 lock_rotation = true
 continuous_cd = 1
 max_contacts_reported = 999
 contact_monitor = true
 script = ExtResource("1_mvj12")
-projectile_speed = 1200.0
+collider = NodePath(".")
+play_effect_on_enemy = true
 play_effect_on_wall = true
 impact_animator = ExtResource("2_juq4l")
 impact_sound = ExtResource("3_qnwr5")

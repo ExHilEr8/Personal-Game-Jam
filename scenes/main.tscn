@@ -1,71 +1,7 @@
-[gd_scene load_steps=10 format=3 uid="uid://dib3hnth51t1o"]
+[gd_scene load_steps=2 format=3 uid="uid://dib3hnth51t1o"]
 
-[ext_resource type="PackedScene" uid="uid://dbwiyy32jjiv8" path="res://scenes/player/player.tscn" id="1_scfp7"]
-[ext_resource type="Script" path="res://scenes/weapon_container.gd" id="2_ex5qh"]
-[ext_resource type="PackedScene" uid="uid://cv3jeqsihp3ey" path="res://scenes/weapons/assault_rifles/m4.tscn" id="3_tawrs"]
-[ext_resource type="Texture2D" uid="uid://8ba48ruimrsk" path="res://assets/sprites/tempplayer.png" id="4_c8107"]
-[ext_resource type="PackedScene" uid="uid://bew6phnc4wfen" path="res://scenes/prefabs/EnemyPrefab.tscn" id="4_oagll"]
-[ext_resource type="PackedScene" uid="uid://cm0aq0yd2skvp" path="res://scenes/physics_projectiles/m4bullet.tscn" id="4_y0fn3"]
-[ext_resource type="PackedScene" uid="uid://d2hqsdb4xswu5" path="res://scenes/prefabs/HitscanProjectilePrefab.tscn" id="5_tdcqm"]
-
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_f2dak"]
-radius = 8.0
-height = 32.0
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_d5o85"]
-size = Vector2(15, 71)
+[ext_resource type="Script" path="res://scenes/MainSceneController.gd" id="1_ar03u"]
 
 [node name="Main" type="Node2D"]
-
-[node name="Player" parent="." instance=ExtResource("1_scfp7")]
-position = Vector2(-52.79, 13.63)
-
-[node name="WeaponContainer" type="Node2D" parent="Player"]
-script = ExtResource("2_ex5qh")
-
-[node name="Weapon" parent="Player/WeaponContainer" instance=ExtResource("3_tawrs")]
-position = Vector2(16, 4)
-fire_rate = 0.05
-magazine_size = 9000
-reserve_ammo = 9000
-queue_firing_delay = 0.0
-physics_projectile = ExtResource("4_y0fn3")
-hitscan_projectile = ExtResource("5_tdcqm")
-
-[node name="EnemyInFront" parent="." instance=ExtResource("4_oagll")]
-
-[node name="Sprite2D" parent="EnemyInFront" index="0"]
-self_modulate = Color(1, 0.466667, 0.415686, 1)
-texture = ExtResource("4_c8107")
-
-[node name="FloatingUIContainer" parent="EnemyInFront" index="1"]
-position = Vector2(0, -20)
-metadata/_edit_group_ = true
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyInFront"]
-shape = SubResource("CapsuleShape2D_f2dak")
-
-[node name="EnemyInBack" parent="." instance=ExtResource("4_oagll")]
-position = Vector2(168, 0)
-
-[node name="Sprite2D" parent="EnemyInBack" index="0"]
-self_modulate = Color(1, 0.466667, 0.415686, 1)
-texture = ExtResource("4_c8107")
-
-[node name="FloatingUIContainer" parent="EnemyInBack" index="1"]
-position = Vector2(0, -20)
-metadata/_edit_group_ = true
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyInBack"]
-shape = SubResource("CapsuleShape2D_f2dak")
-
-[node name="Wall" type="StaticBody2D" parent="." groups=["Wall"]]
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Wall" groups=["Wall"]]
-position = Vector2(84, 2)
-shape = SubResource("RectangleShape2D_d5o85")
-debug_color = Color(0.913725, 0.290196, 0, 0.419608)
-
-[editable path="Player/WeaponContainer/Weapon"]
-[editable path="EnemyInFront"]
-[editable path="EnemyInBack"]
+script = ExtResource("1_ar03u")
+scene_to_set = "res://scenes/testing_scenes/weapon_testing.tscn"

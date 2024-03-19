@@ -96,7 +96,6 @@ func initialize_raycast() -> RayCast2D:
 	raycast.exclude_parent = true 
 	raycast.collision_mask = hitscan_collision_mask
 	raycast.enabled = true
-	raycast.exclude_parent = true
 
 	return raycast
 
@@ -276,11 +275,11 @@ func initialize_general_timer() -> Timer:
 func _on_enemy_hit(hit_position: Vector2, enemy: Node, projectile):
 	damage_enemy(enemy, projectile.damage)
 
-	if is_hitscan == false:
+	if is_hitscan == false and projectile.is_enemy_piercing == false:
 		projectile.queue_free()
 
-func _on_wall_hit(hit_position: Vector2, enemy: Node, projectile):
-	if is_hitscan == false:
+func _on_wall_hit(hit_position: Vector2, wall: Node, projectile):
+	if is_hitscan == false and not projectile.is_wall_piercing:
 		projectile.queue_free()
 
 func damage_enemy(enemy, damage) -> void:
