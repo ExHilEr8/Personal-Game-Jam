@@ -21,7 +21,7 @@ class_name Weapon extends Sprite2D
 @export_category("Misc")
 @export var is_hitscan: bool = false
 @export var hitscan_ray_length: float = float(2000)
-@export var hitscan_collision_mask: int = int(1)
+@export var hitscan_collision_mask: int = CollisionConstants.get_final_layer([CollisionConstants.ENEMY, CollisionConstants.WALL])
 @export var hitscan_custom_instance_point: Vector2 = Vector2(0,0)
 @export var allow_queued_firing: bool = true
 @export var queue_firing_delay: float = float(0.1):
@@ -111,7 +111,10 @@ func _process(_delta):
 func _physics_process(_delta):
 	if is_hitscan == true:
 		for ray in hitscan_raycasts:
-			ray.target_position = Vector2(hitscan_ray_length, 0)
+			ray.target_position = get_default_ray_target()
+
+func get_default_ray_target() -> Vector2:
+	return Vector2(hitscan_ray_length, 0)
 
 func check_attempt_reload():
 	if Input.is_action_just_pressed("reload") and reserve_ammo > 0 and magazine_count < magazine_size and is_reloading == false:
@@ -173,7 +176,8 @@ func shoot():
 	var rotation_param = initial_rotation - ((PI * (1 - initial_accuracy)) / 2)
 
 	# Not sure why but the rotation_param needs to be adjusted by half of a spread increment to
-	#	align properly, otherwise it shoots too far counter clockwise
+	#	align properly, otherwise it shoots too far counter clockwise. Probably some basic math
+	#	I'm overlooking at the time of coding
 	rotation_param += spread_increment / 2
 
 	if(is_hitscan == true):
@@ -230,11 +234,10 @@ func fire_hitscan(ray: RayCast2D, projectile, projectile_rotation: float):
 		if ray.is_colliding():
 			var collider = ray.get_collider()
 			var collision_point = ray.get_collision_point()
-			var collision_rotation = get_global_rotation()
+			var collision_rotation = ray.get_global_rotation()
 			projectile.on_collision(collider, collision_point, collision_rotation)
-			print(collider)
 		
-			if (collider.is_in_group("Enemy") and projectile.is_enemy_piercing) or (collider.is_in_group("Wall") and projectile.is_wall_piercing):
+			if (collider.is_in_group("Enemy") and projectile.is_enemy_piercing == true) or (collider.is_in_group("Wall") and projectile.is_wall_piercing == true):
 				check_next = true
 				ray.add_exception(collider)
 				

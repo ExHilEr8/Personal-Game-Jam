@@ -22,7 +22,7 @@ const PLAYER_BIT = int(PLAYER_LAYER - 1)
 const PLAYERPROJECTILE_BIT = int(PLAYERPROJECTILE_LAYER - 1)
 const WALL_BIT = int(WALL_LAYER - 1)
 
-func get_final_layer(const_list: Array) -> int:
+static func get_final_layer(const_list: Array) -> int:
 	var result = int(0)
 
 	for item in const_list:

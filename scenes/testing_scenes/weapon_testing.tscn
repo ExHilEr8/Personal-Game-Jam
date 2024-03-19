@@ -29,6 +29,7 @@ position = Vector2(16, 4)
 fire_rate = 0.05
 magazine_size = 9000
 reserve_ammo = 9000
+is_hitscan = true
 queue_firing_delay = 0.0
 physics_projectile = ExtResource("4_cxa28")
 hitscan_projectile = ExtResource("5_txgtt")
