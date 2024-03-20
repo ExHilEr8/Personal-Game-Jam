@@ -15,6 +15,9 @@ class_name Weapon extends Sprite2D
 @export var is_burst_fire: bool = false
 @export var burst_amount: int = int(1)
 @export var burst_fire_rate: float = float(0.1)
+@export var charge_time_seconds: float = float(1)
+@export var is_charge_fire: bool = false
+@export var minimum_charge: float = float(0)
 @export var projectile_count: int = int(1)
 @export var projectile_even_spread: bool = false
 
@@ -24,11 +27,11 @@ class_name Weapon extends Sprite2D
 @export var hitscan_collision_mask: int = CollisionConstants.get_final_layer([CollisionConstants.ENEMY, CollisionConstants.WALL])
 @export var hitscan_custom_instance_point: Vector2 = Vector2(0,0)
 @export var allow_queued_firing: bool = true
-@export var queue_firing_delay: float = float(0.1):
+@export var queue_firing_delay: float = float(0.1) :
 	get:
 		return queue_firing_delay
 	set(value):
-		queue_firing_delay = clamp(value, 0, fire_rate)
+		queue_firing_delay = clamp(float(value), float(0), float(1))
 
 @export_category("Resources")
 @export var physics_projectile: PackedScene
@@ -38,26 +41,28 @@ var hitscan_raycasts = []
 var hitscan_projectile_instances = []
 
 var burst_timer: Timer
-var is_bursting = false
+var is_bursting: bool = false
 
 var reload_timer: Timer
-var is_reloading = false
+var is_reloading: bool = false
 
 var fire_rate_timer: Timer
 var fired_is_queued: bool = false
+
+var can_fire = bool(true) 
+
+var charge_full_autod_previously: bool = false
+var current_charge: float = float(0) :
+	get:
+		return current_charge
+	set(value):
+		current_charge = clamp(float(value), float(0), float(1))
 
 var magazine_count: int :
 	get:
 		return magazine_count
 	set(value):
 		magazine_count = clamp(value, 0, 9223372036854775807)
-
-var can_fire = true :
-	get:
-		return can_fire
-	set(value):
-		can_fire = bool(value)
-		
 
 func _ready():
 	fire_rate_timer = initialize_general_timer()
@@ -99,16 +104,19 @@ func initialize_raycast() -> RayCast2D:
 
 	return raycast
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(_delta):
-	if(is_full_auto):
-		check_attempt_full_fire()
+func _process(delta):
+	if is_charge_fire == true:
+		check_attempt_charge_fire(delta)
+
 	else:
-		check_attempt_single_fire()
+		if is_full_auto == true:
+			check_attempt_full_fire()
+		else:
+			check_attempt_single_fire()
 
 	check_attempt_reload()
 
-func _physics_process(_delta):
+func _physics_process(delta):
 	if is_hitscan == true:
 		for ray in hitscan_raycasts:
 			ray.target_position = get_default_ray_target()
@@ -116,13 +124,13 @@ func _physics_process(_delta):
 func get_default_ray_target() -> Vector2:
 	return Vector2(hitscan_ray_length, 0)
 
-func check_attempt_reload():
-	if Input.is_action_just_pressed("reload") and reserve_ammo > 0 and magazine_count < magazine_size and is_reloading == false:
-		start_reload()
-
 func start_reload():
 	reload_timer.start(reload_time)
 	is_reloading = true
+
+func check_attempt_reload():
+	if Input.is_action_just_pressed("reload") and reserve_ammo > 0 and magazine_count < magazine_size and is_reloading == false:
+		start_reload()
 
 func check_attempt_full_fire():
 	if Input.is_action_pressed("primary_action"):
@@ -131,8 +139,27 @@ func check_attempt_full_fire():
 func check_attempt_single_fire():
 	if Input.is_action_just_pressed("primary_action"):
 		try_fire()
+
+func check_attempt_charge_fire(delta):
+	if Input.is_action_pressed("primary_action"):
+		current_charge += float((1 * delta) / charge_time_seconds)
+
+		if current_charge == 1 and is_full_auto == true:
+			try_fire()
+			current_charge = 0
+			charge_full_autod_previously = true
+	
+	elif Input.is_action_just_released("primary_action"):
+		if current_charge >= minimum_charge and charge_full_autod_previously == false:
+			try_fire()
+		elif charge_full_autod_previously == true:
+			charge_full_autod_previously = false
+		
+		current_charge = 0
 		
 func try_fire():
+	determine_can_fire()
+
 	if is_burst_fire == true:
 		burst_fire()
 
@@ -140,14 +167,10 @@ func try_fire():
 		regular_fire()
 
 func regular_fire():
-	determine_can_fire()
-
 	if(can_fire == true):
 		shoot()
 
 func burst_fire():
-	determine_can_fire()
-	
 	if(can_fire == true):
 		is_bursting = true
 
@@ -161,7 +184,6 @@ func burst_fire():
 
 func shoot():
 	var spread_increment = (PI * (1 - initial_accuracy)) / projectile_count
-
 	var initial_rotation
 
 	if is_hitscan == true:
@@ -172,7 +194,8 @@ func shoot():
 		initial_rotation = get_global_rotation()
 
 	# Subtracts half of the entire width of the spread from the initial_rotation to determine
-	#	the starting point for the spread, and then rotates down with each subsequent projectile
+	#	the starting point for the spread, and then rotates down with each subsequent projectile.
+	# (This process is just super smash n64 fox up + b move lmao)
 	var rotation_param = initial_rotation - ((PI * (1 - initial_accuracy)) / 2)
 
 	# Not sure why but the rotation_param needs to be adjusted by half of a spread increment to
@@ -180,24 +203,29 @@ func shoot():
 	#	I'm overlooking at the time of coding
 	rotation_param += spread_increment / 2
 
+	var pass_charge = float(1)
+
+	if is_charge_fire == true:
+		pass_charge = current_charge
+
 	if(is_hitscan == true):
 		for n in hitscan_raycasts.size():
 			if projectile_even_spread == true:
-				fire_hitscan(hitscan_raycasts[n], hitscan_projectile_instances[n], rotation_param)
+				fire_hitscan(hitscan_raycasts[n], hitscan_projectile_instances[n], rotation_param, pass_charge)
 				rotation_param += spread_increment
 			else:
-				fire_hitscan(hitscan_raycasts[n], hitscan_projectile_instances[n], apply_accuracy(hitscan_raycasts[n].rotation, initial_accuracy))
+				fire_hitscan(hitscan_raycasts[n], hitscan_projectile_instances[n], apply_accuracy(hitscan_raycasts[n].rotation, initial_accuracy), pass_charge)
 
 	else:
 		for n in projectile_count:
 			if projectile_even_spread == true:
-				fire_projectile(physics_projectile, $BulletInstancePoint.get_global_position(), rotation_param)
+				fire_projectile(physics_projectile, $BulletInstancePoint.get_global_position(), rotation_param, pass_charge)
 				rotation_param += spread_increment
 			else:
-				fire_projectile(physics_projectile, $BulletInstancePoint.get_global_position(), apply_accuracy(get_global_rotation(), initial_accuracy))
+				fire_projectile(physics_projectile, $BulletInstancePoint.get_global_position(), apply_accuracy(get_global_rotation(), initial_accuracy), pass_charge)
 			
-
 	fire_rate_timer.start(fire_rate)
+
 	print("fire", magazine_count, "/", magazine_size)
 
 
@@ -207,10 +235,11 @@ func apply_accuracy(initial_rotation, accuracy: float) -> float:
 
 # fire_projectile() uses the physics_projectile: PackedScene which is generally provided
 #	in the editor per gun. See PhysicsProjectilePrefab.tscn for more info
-func fire_projectile(projectile_scene: PackedScene, projectile_start_point: Vector2, projectile_rotation: float):
+func fire_projectile(projectile_scene: PackedScene, projectile_start_point: Vector2, projectile_rotation: float, projectile_charge: float = float(1)):
 	var projectile_instance = projectile_scene.instantiate()
 	projectile_instance.position = projectile_start_point
 	projectile_instance.rotation = projectile_rotation
+	projectile_instance.charge = projectile_charge
 	projectile_instance.apply_impulse(Vector2(projectile_instance.projectile_speed, 0).rotated(projectile_instance.rotation), Vector2())
 	get_tree().get_root().add_child(projectile_instance)
 
@@ -223,7 +252,9 @@ func fire_projectile(projectile_scene: PackedScene, projectile_start_point: Vect
 
 # fire_hitscan() uses the hitscan_projectile: PackedScene which is generally provided
 #	in the editor per gun. See HitscanProjectilePrefab.tscn for more info
-func fire_hitscan(ray: RayCast2D, projectile, projectile_rotation: float):
+func fire_hitscan(ray: RayCast2D, projectile, projectile_rotation: float, projectile_charge: float = float(1)):
+	projectile.charge = projectile_charge
+
 	if(initial_accuracy < 1):
 		ray.target_position = ray.target_position.rotated(projectile_rotation)
 

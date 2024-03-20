@@ -20,12 +20,21 @@ class_name Projectile extends Node2D
 @export var sound_volume : float = 0.0
 @export var sound_attenuation: float = float(1)
 
+var charge: float = float(1):
+	get:
+		return charge
+	set(value):
+		charge = clamp(float(value), float(0), float(1))
+
 var impact_effect: ImpactEffect = ImpactEffect.new()
 
 signal enemy_hit(position: Vector2, enemy: Node, projectile)
 signal enemy_exit(position: Vector2, enemy: Node, projectile)
 signal wall_hit(position: Vector2, wall: Node, projectile)
 signal wall_exit(position: Vector2, wall: Node, projectile)
+
+func _ready():
+	print(charge)
 
 func determine_projectile_interaction(parent, body: Node, bullet_global_position: Vector2, bullet_global_rotation: float):
 	if body.is_in_group("Enemy"):
