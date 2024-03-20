@@ -8,9 +8,10 @@ font_color = Color(0.286275, 0.901961, 0.207843, 1)
 outline_size = 1
 outline_color = Color(0, 0, 0, 1)
 
-[node name="EnemyPrefab" type="CharacterBody2D" groups=["Enemy"]]
+[node name="EnemyPrefab" type="CharacterBody2D" node_paths=PackedStringArray("floating_health") groups=["Enemy"]]
 motion_mode = 1
 script = ExtResource("1_b72ut")
+floating_health = NodePath("FloatingUIContainer/Label")
 metadata/_edit_group_ = true
 
 [node name="Sprite2D" type="Sprite2D" parent="." groups=["Enemy"]]

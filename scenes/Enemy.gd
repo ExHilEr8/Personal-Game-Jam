@@ -11,6 +11,9 @@ class_name Enemy extends CharacterBody2D
 
 @export var despawn_on_death: bool = true
 
+@export_category("Resources")
+@export var floating_health: Label
+
 signal took_damage(damage: float)
 signal took_lethal_damage()
 
@@ -32,4 +35,4 @@ func _on_lethal_damage():
 		queue_free()
 
 func _update_floating_health(damage: float):
-	$FloatingUIContainer.get_node("Label").text = (str(health).pad_decimals(0) + "/" + str(max_health).pad_decimals(0))
+	floating_health.text = (str(health).pad_decimals(0) + "/" + str(max_health).pad_decimals(0))

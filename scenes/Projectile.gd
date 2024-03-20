@@ -1,6 +1,6 @@
 class_name Projectile extends Node2D
 
-@export_category("Projectile Stats")
+@export_group("Projectile Stats")
 @export var damage: float = float(1)
 @export var projectile_speed: float = float(550)
 @export var ammo_per_shot: int = int(1)
@@ -8,7 +8,11 @@ class_name Projectile extends Node2D
 @export var is_wall_piercing: bool = false
 @export var play_effect_on_enemy: bool = false
 @export var play_effect_on_wall: bool = false
-
+@export var is_charged_type: bool = false
+@export_subgroup("Charged Curves")
+@export var charged_size_curve: Curve
+@export var charged_damage_curve: Curve
+@export var charged_speed_curve: Curve
 
 @export_category("Animation")
 @export var impact_animator: PackedScene
@@ -33,8 +37,22 @@ signal enemy_exit(position: Vector2, enemy: Node, projectile)
 signal wall_hit(position: Vector2, wall: Node, projectile)
 signal wall_exit(position: Vector2, wall: Node, projectile)
 
-func _ready():
-	print(charge)
+func _enter_tree():
+	if is_charged_type == true:
+		apply_charge_mods(charge)
+
+func apply_charge_mods(charge_to_apply):
+	if charged_size_curve != null:
+		var charged_size = charged_size_curve.sample(charge_to_apply)
+
+		for child in get_children():
+			child.scale = child.scale * charged_size
+
+	if charged_damage_curve != null:
+		damage = charged_damage_curve.sample(charge_to_apply)
+
+	if charged_speed_curve != null:
+		projectile_speed = charged_speed_curve.sample(charge_to_apply)
 
 func determine_projectile_interaction(parent, body: Node, bullet_global_position: Vector2, bullet_global_rotation: float):
 	if body.is_in_group("Enemy"):

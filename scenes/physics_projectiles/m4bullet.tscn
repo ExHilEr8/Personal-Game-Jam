@@ -23,6 +23,7 @@ impact_animator = ExtResource("2_juq4l")
 impact_sound = ExtResource("3_qnwr5")
 sound_volume = -15.0
 sound_attenuation = 0.95
+metadata/_edit_group_ = true
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture = ExtResource("2_pfd3t")
