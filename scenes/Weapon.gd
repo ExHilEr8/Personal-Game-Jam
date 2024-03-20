@@ -1,6 +1,10 @@
 class_name Weapon extends Sprite2D
 
-@export_category("Weapon Stats")
+###############################
+#####   EXPORT VARIABLES  #####
+###############################
+
+@export_group("Weapon Stats")
 @export var fire_rate: float = float(0.3)
 @export var reload_time: float = float(1)
 @export var initial_accuracy: float = float(1) :
@@ -11,21 +15,32 @@ class_name Weapon extends Sprite2D
 		
 @export var magazine_size: int = int(30)
 @export var reserve_ammo: int = int(90)
-@export var is_full_auto: bool = true
-@export var is_burst_fire: bool = false
-@export var burst_amount: int = int(1)
-@export var burst_fire_rate: float = float(0.1)
-@export var charge_time_seconds: float = float(1)
-@export var is_charge_fire: bool = false
-@export var minimum_charge: float = float(0)
 @export var projectile_count: int = int(1)
-@export var projectile_even_spread: bool = false
 
-@export_category("Misc")
+@export_subgroup("Projectile Options")
+@export var projectile_even_spread: bool = false
 @export var is_hitscan: bool = false
 @export var hitscan_ray_length: float = float(2000)
 @export var hitscan_collision_mask: int = CollisionConstants.get_final_layer([CollisionConstants.ENEMY, CollisionConstants.WALL])
 @export var hitscan_custom_instance_point: Vector2 = Vector2(0,0)
+
+
+@export_group("Firemode Options")
+@export_subgroup("Full Auto Options")
+@export var is_full_auto: bool = true
+
+@export_subgroup("Burst Options")
+@export var is_burst_fire: bool = false
+@export var burst_amount: int = int(1)
+@export var burst_fire_rate: float = float(0.1)
+
+@export_subgroup("Charge Options")
+@export var is_charge_fire: bool = false
+@export var charge_time_seconds: float = float(1)
+@export var minimum_charge: float = float(0)
+
+
+@export_group("Misc")
 @export var allow_queued_firing: bool = true
 @export var queue_firing_delay: float = float(0.1) :
 	get:
@@ -37,21 +52,24 @@ class_name Weapon extends Sprite2D
 @export var physics_projectile: PackedScene
 @export var hitscan_projectile: PackedScene
 
+
+###############################
+#####   CLASS VARIABLES   #####
+###############################
+
 var hitscan_raycasts = []
 var hitscan_projectile_instances = []
 
 var burst_timer: Timer
-var is_bursting: bool = false
-
 var reload_timer: Timer
-var is_reloading: bool = false
-
 var fire_rate_timer: Timer
-var fired_is_queued: bool = false
+var is_bursting: bool = false
+var is_reloading: bool = false
+var is_fired_queued: bool = false
 
-var can_fire = bool(true) 
-
+var can_fire: bool = true 
 var charge_full_autod_previously: bool = false
+
 var current_charge: float = float(0) :
 	get:
 		return current_charge
@@ -63,6 +81,11 @@ var magazine_count: int :
 		return magazine_count
 	set(value):
 		magazine_count = clamp(value, 0, 9223372036854775807)
+
+
+###############################
+#####      FUNCTIONS      #####
+###############################
 
 func _ready():
 	fire_rate_timer = initialize_general_timer()
@@ -93,16 +116,6 @@ func _ready():
 			hitscan_projectile_instances.append(temp_projectile)
 			add_child(temp_projectile)
 			temp_projectile.enemy_hit.connect(_on_enemy_hit)
-		
-		
-func initialize_raycast() -> RayCast2D:
-	var raycast = RayCast2D.new()
-	raycast.hit_from_inside = true
-	raycast.exclude_parent = true 
-	raycast.collision_mask = hitscan_collision_mask
-	raycast.enabled = true
-
-	return raycast
 
 func _process(delta):
 	if is_charge_fire == true:
@@ -120,13 +133,6 @@ func _physics_process(delta):
 	if is_hitscan == true:
 		for ray in hitscan_raycasts:
 			ray.target_position = get_default_ray_target()
-
-func get_default_ray_target() -> Vector2:
-	return Vector2(hitscan_ray_length, 0)
-
-func start_reload():
-	reload_timer.start(reload_time)
-	is_reloading = true
 
 func check_attempt_reload():
 	if Input.is_action_just_pressed("reload") and reserve_ammo > 0 and magazine_count < magazine_size and is_reloading == false:
@@ -162,13 +168,8 @@ func try_fire():
 
 	if is_burst_fire == true:
 		burst_fire()
-
 	else:
 		regular_fire()
-
-func regular_fire():
-	if(can_fire == true):
-		shoot()
 
 func burst_fire():
 	if(can_fire == true):
@@ -176,11 +177,14 @@ func burst_fire():
 
 		for n in (burst_amount):
 			shoot()
-
 			burst_timer.start(burst_fire_rate)
 			await burst_timer.timeout
 		
 		is_bursting = false
+
+func regular_fire():
+	if(can_fire == true):
+		shoot()
 
 func shoot():
 	var spread_increment = (PI * (1 - initial_accuracy)) / projectile_count
@@ -228,11 +232,6 @@ func shoot():
 
 	print("fire", magazine_count, "/", magazine_size)
 
-
-func apply_accuracy(initial_rotation, accuracy: float) -> float:
-	var rad_offset = PI * (1 - accuracy) 
-	return randf_range(initial_rotation - rad_offset, initial_rotation + rad_offset)
-
 # fire_projectile() uses the physics_projectile: PackedScene which is generally provided
 #	in the editor per gun. See PhysicsProjectilePrefab.tscn for more info
 func fire_projectile(projectile_scene: PackedScene, projectile_start_point: Vector2, projectile_rotation: float, projectile_charge: float = float(1)):
@@ -279,8 +278,14 @@ func fire_hitscan(ray: RayCast2D, projectile, projectile_rotation: float, projec
 			check_next = false
 	
 	ray.clear_exceptions()
-	
 	magazine_count -= projectile.ammo_per_shot
+
+func damage_enemy(enemy, damage) -> void:
+	enemy.take_damage(damage)
+
+func apply_accuracy(initial_rotation, accuracy: float) -> float:
+	var rad_offset = PI * (1 - accuracy) 
+	return randf_range(initial_rotation - rad_offset, initial_rotation + rad_offset)
 
 func _reload_timer_finished():
 	reload()
@@ -301,13 +306,53 @@ func reload() -> void:
 	print("reloaded", magazine_count, "/", magazine_size)
 	print("reserve ammo", reserve_ammo)
 
+func start_reload():
+	reload_timer.start(reload_time)
+	is_reloading = true
+
+func determine_can_fire():
+	can_fire = true
+
+	if(is_reloading == true):
+		can_fire = false
+		return
+
+	elif(is_bursting == true):
+		can_fire = false
+		return
+
+	elif(magazine_count == 0):
+		can_fire = false
+		return
+		
+	elif(fire_rate_timer.time_left > 0):
+		can_fire = false
+		return
+
 func initialize_general_timer() -> Timer:
 	var timer = Timer.new()
 	get_tree().get_root().add_child.call_deferred(timer)
 	timer.one_shot = true
 	timer.autostart = false
 	return timer
-	
+
+func initialize_raycast() -> RayCast2D:
+	var raycast = RayCast2D.new()
+	raycast.hit_from_inside = true
+	raycast.exclude_parent = true 
+	raycast.collision_mask = hitscan_collision_mask
+	raycast.enabled = true
+
+	return raycast
+
+func get_default_ray_target() -> Vector2:
+	return Vector2(hitscan_ray_length, 0)
+
+
+###############################
+##### SIGNAL CONNECTIONS ######
+###############################
+
 func _on_enemy_hit(hit_position: Vector2, enemy: Node, projectile):
 	damage_enemy(enemy, projectile.damage)
 
@@ -333,27 +378,5 @@ func _on_wall_hit(hit_position: Vector2, wall: Node, projectile):
 func _on_wall_exit(hit_position: Vector2, wall: Node, projectile):
 	if is_hitscan == false and projectile.is_wall_piercing == true:
 		projectile.collider.remove_collision_exception_with(wall)
-
-func damage_enemy(enemy, damage) -> void:
-	enemy.take_damage(damage)
-
-func determine_can_fire():
-	can_fire = true
-
-	if(is_reloading == true):
-		can_fire = false
-		return
-
-	elif(is_bursting == true):
-		can_fire = false
-		return
-
-	elif(magazine_count == 0):
-		can_fire = false
-		return
-		
-	elif(fire_rate_timer.time_left > 0):
-		can_fire = false
-		return
 
 
