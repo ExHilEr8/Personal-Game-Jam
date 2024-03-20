@@ -17,6 +17,7 @@ max_contacts_reported = 999
 contact_monitor = true
 script = ExtResource("1_mvj12")
 collider = NodePath(".")
+projectile_speed = 400.0
 play_effect_on_enemy = true
 play_effect_on_wall = true
 impact_animator = ExtResource("2_juq4l")

@@ -7,17 +7,20 @@ class_name Weapon extends Sprite2D
 @export_group("Weapon Stats")
 @export var fire_rate: float = float(0.3)
 @export var reload_time: float = float(1)
+@export_subgroup("Reload Misc")
+@export var reload_single_bullets: bool = false
+@export var bullets_to_reload: int = int(1)
+@export_subgroup("")
 @export var initial_accuracy: float = float(1) :
 	get:
 		return initial_accuracy
 	set(value):
 		initial_accuracy = clamp(value, 0, 1)
-		
 @export var magazine_size: int = int(30)
 @export var reserve_ammo: int = int(90)
+@export_group("Projectile Options")
 @export var projectile_count: int = int(1)
-
-@export_subgroup("Projectile Options")
+@export var projectile_cost_override: int = int(0)
 @export var projectile_even_spread: bool = false
 @export var is_hitscan: bool = false
 @export_subgroup("Hitscan Misc Options")
@@ -48,6 +51,7 @@ class_name Weapon extends Sprite2D
 		return time_left_to_queue
 	set(value):
 		time_left_to_queue = clamp(float(value), float(0), float(fire_rate))
+
 
 @export_category("Resources")
 @export var physics_projectile: PackedScene
@@ -233,7 +237,6 @@ func shoot():
 				rotation_param += spread_increment
 			else:
 				fire_hitscan(hitscan_raycasts[n], hitscan_projectile_instances[n], apply_accuracy(hitscan_raycasts[n].rotation, initial_accuracy), projectile_charge)
-
 	else:
 		for n in projectile_count:
 			if projectile_even_spread == true:
@@ -241,6 +244,10 @@ func shoot():
 				rotation_param += spread_increment
 			else:
 				fire_projectile(physics_projectile, $BulletInstancePoint.get_global_position(), apply_accuracy(get_global_rotation(), initial_accuracy), projectile_charge)
+
+	if projectile_cost_override >= 0:
+		deduct_ammo(projectile_cost_override)
+
 
 	print("fire", magazine_count, "/", magazine_size)
 
@@ -260,7 +267,12 @@ func fire_projectile(projectile_scene: PackedScene, projectile_start_point: Vect
 	projectile_instance.wall_hit.connect(_on_wall_hit)
 	projectile_instance.wall_exit.connect(_on_wall_exit)
 
-	magazine_count -= projectile_instance.ammo_per_shot
+	if projectile_cost_override <= 0:
+		deduct_ammo(projectile_instance.ammo_per_shot)
+	
+	return projectile_instance
+		
+
 
 # fire_hitscan() uses the hitscan_projectile: PackedScene which is generally provided
 #	in the editor per gun. See HitscanProjectilePrefab.tscn for more info
@@ -291,7 +303,10 @@ func fire_hitscan(ray: RayCast2D, projectile, projectile_rotation: float, projec
 			check_next = false
 	
 	ray.clear_exceptions()
-	magazine_count -= projectile.ammo_per_shot
+
+	if projectile_cost_override <= 0:
+		deduct_ammo(projectile.ammo_per_shot)
+		
 
 func determine_can_fire():
 	can_fire = true
@@ -318,6 +333,9 @@ func damage_enemy(enemy, damage) -> void:
 func apply_accuracy(initial_rotation, accuracy: float) -> float:
 	var rad_offset = PI * (1 - accuracy) 
 	return randf_range(initial_rotation - rad_offset, initial_rotation + rad_offset)
+
+func deduct_ammo(projectile_cost, projectiles_fired: int = int(1)):
+	magazine_count -= projectile_cost * projectiles_fired
 
 func start_reload():
 	reload_timer.start(reload_time)

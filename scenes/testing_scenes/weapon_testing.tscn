@@ -26,12 +26,13 @@ script = ExtResource("2_xvo12")
 
 [node name="Weapon" parent="Player/WeaponContainer" instance=ExtResource("3_5a638")]
 position = Vector2(16, 4)
-fire_rate = 1.2
-magazine_size = 99999
-reserve_ammo = 99999
-is_burst_fire = true
-burst_amount = 9
-burst_fire_rate = 0.05
+fire_rate = 0.1
+reload_single_bullets = true
+initial_accuracy = 0.95
+magazine_size = 999999
+reserve_ammo = 999999
+projectile_count = 5
+allow_queued_firing = false
 time_left_to_queue = 3.0
 physics_projectile = ExtResource("4_cxa28")
 hitscan_projectile = ExtResource("5_txgtt")
