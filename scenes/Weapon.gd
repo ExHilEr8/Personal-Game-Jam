@@ -20,6 +20,7 @@ class_name Weapon extends Sprite2D
 @export_subgroup("Projectile Options")
 @export var projectile_even_spread: bool = false
 @export var is_hitscan: bool = false
+@export_subgroup("Hitscan Misc Options")
 @export var hitscan_ray_length: float = float(2000)
 @export var hitscan_collision_mask: int = CollisionConstants.get_final_layer([CollisionConstants.ENEMY, CollisionConstants.WALL])
 @export var hitscan_custom_instance_point: Vector2 = Vector2(0,0)
@@ -42,11 +43,11 @@ class_name Weapon extends Sprite2D
 
 @export_group("Misc")
 @export var allow_queued_firing: bool = true
-@export var queue_firing_delay: float = float(0.1) :
+@export var time_left_to_queue: float = float(0.1) :
 	get:
-		return queue_firing_delay
+		return time_left_to_queue
 	set(value):
-		queue_firing_delay = clamp(float(value), float(0), float(1))
+		time_left_to_queue = clamp(float(value), float(0), float(1))
 
 @export_category("Resources")
 @export var physics_projectile: PackedScene
@@ -166,25 +167,24 @@ func check_attempt_charge_fire(delta):
 func try_fire():
 	determine_can_fire()
 
-	if is_burst_fire == true:
-		burst_fire()
-	else:
-		regular_fire()
+	if can_fire == true:
+		if is_burst_fire == true:
+			burst_fire()
+		else:
+			regular_fire()
 
 func burst_fire():
-	if(can_fire == true):
-		is_bursting = true
+	is_bursting = true
 
-		for n in (burst_amount):
-			shoot()
-			burst_timer.start(burst_fire_rate)
-			await burst_timer.timeout
-		
-		is_bursting = false
+	for n in (burst_amount):
+		shoot()
+		burst_timer.start(burst_fire_rate)
+		await burst_timer.timeout
+	
+	is_bursting = false
 
 func regular_fire():
-	if(can_fire == true):
-		shoot()
+	shoot()
 
 func shoot():
 	var spread_increment = (PI * (1 - initial_accuracy)) / projectile_count
@@ -207,26 +207,26 @@ func shoot():
 	#	I'm overlooking at the time of coding
 	rotation_param += spread_increment / 2
 
-	var pass_charge = float(1)
+	var projectile_charge = float(1)
 
 	if is_charge_fire == true:
-		pass_charge = current_charge
+		projectile_charge = current_charge
 
 	if(is_hitscan == true):
 		for n in hitscan_raycasts.size():
 			if projectile_even_spread == true:
-				fire_hitscan(hitscan_raycasts[n], hitscan_projectile_instances[n], rotation_param, pass_charge)
+				fire_hitscan(hitscan_raycasts[n], hitscan_projectile_instances[n], rotation_param, projectile_charge)
 				rotation_param += spread_increment
 			else:
-				fire_hitscan(hitscan_raycasts[n], hitscan_projectile_instances[n], apply_accuracy(hitscan_raycasts[n].rotation, initial_accuracy), pass_charge)
+				fire_hitscan(hitscan_raycasts[n], hitscan_projectile_instances[n], apply_accuracy(hitscan_raycasts[n].rotation, initial_accuracy), projectile_charge)
 
 	else:
 		for n in projectile_count:
 			if projectile_even_spread == true:
-				fire_projectile(physics_projectile, $BulletInstancePoint.get_global_position(), rotation_param, pass_charge)
+				fire_projectile(physics_projectile, $BulletInstancePoint.get_global_position(), rotation_param, projectile_charge)
 				rotation_param += spread_increment
 			else:
-				fire_projectile(physics_projectile, $BulletInstancePoint.get_global_position(), apply_accuracy(get_global_rotation(), initial_accuracy), pass_charge)
+				fire_projectile(physics_projectile, $BulletInstancePoint.get_global_position(), apply_accuracy(get_global_rotation(), initial_accuracy), projectile_charge)
 			
 	fire_rate_timer.start(fire_rate)
 
@@ -239,8 +239,9 @@ func fire_projectile(projectile_scene: PackedScene, projectile_start_point: Vect
 	projectile_instance.position = projectile_start_point
 	projectile_instance.rotation = projectile_rotation
 	projectile_instance.charge = projectile_charge
-	projectile_instance.apply_impulse(Vector2(projectile_instance.projectile_speed, 0).rotated(projectile_instance.rotation), Vector2())
 	get_tree().get_root().add_child(projectile_instance)
+
+	projectile_instance.apply_impulse(Vector2(projectile_instance.projectile_speed, 0).rotated(projectile_instance.rotation), Vector2())
 
 	projectile_instance.enemy_hit.connect(_on_enemy_hit)
 	projectile_instance.enemy_exit.connect(_on_enemy_exit)
@@ -280,12 +281,35 @@ func fire_hitscan(ray: RayCast2D, projectile, projectile_rotation: float, projec
 	ray.clear_exceptions()
 	magazine_count -= projectile.ammo_per_shot
 
+func determine_can_fire():
+	can_fire = true
+
+	if(is_reloading == true):
+		can_fire = false
+		return
+
+	elif(is_bursting == true):
+		can_fire = false
+		return
+
+	elif(magazine_count == 0):
+		can_fire = false
+		return
+		
+	elif(fire_rate_timer.time_left > 0):
+		can_fire = false
+		return
+
 func damage_enemy(enemy, damage) -> void:
 	enemy.take_damage(damage)
 
 func apply_accuracy(initial_rotation, accuracy: float) -> float:
 	var rad_offset = PI * (1 - accuracy) 
 	return randf_range(initial_rotation - rad_offset, initial_rotation + rad_offset)
+
+func start_reload():
+	reload_timer.start(reload_time)
+	is_reloading = true
 
 func _reload_timer_finished():
 	reload()
@@ -306,28 +330,8 @@ func reload() -> void:
 	print("reloaded", magazine_count, "/", magazine_size)
 	print("reserve ammo", reserve_ammo)
 
-func start_reload():
-	reload_timer.start(reload_time)
-	is_reloading = true
-
-func determine_can_fire():
-	can_fire = true
-
-	if(is_reloading == true):
-		can_fire = false
-		return
-
-	elif(is_bursting == true):
-		can_fire = false
-		return
-
-	elif(magazine_count == 0):
-		can_fire = false
-		return
-		
-	elif(fire_rate_timer.time_left > 0):
-		can_fire = false
-		return
+func reset_time_to_last_shot():
+	time_to_last_shot = float(0)
 
 func initialize_general_timer() -> Timer:
 	var timer = Timer.new()
@@ -350,7 +354,7 @@ func get_default_ray_target() -> Vector2:
 
 
 ###############################
-##### SIGNAL CONNECTIONS ######
+# EXTERNAL SIGNAL CONNECTIONS #
 ###############################
 
 func _on_enemy_hit(hit_position: Vector2, enemy: Node, projectile):
