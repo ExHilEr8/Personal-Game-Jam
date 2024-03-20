@@ -181,6 +181,7 @@ func try_fire():
 			burst_fire()
 		else:
 			regular_fire()
+		
 
 	elif can_fire == false and allow_queued_firing == true:
 		if Input.is_action_just_pressed("primary_action") and fire_rate_timer.time_left <= time_left_to_queue:
@@ -241,7 +242,6 @@ func shoot():
 			else:
 				fire_projectile(physics_projectile, $BulletInstancePoint.get_global_position(), apply_accuracy(get_global_rotation(), initial_accuracy), projectile_charge)
 
-	is_fire_queued = false
 	print("fire", magazine_count, "/", magazine_size)
 
 # fire_projectile() uses the physics_projectile: PackedScene which is generally provided

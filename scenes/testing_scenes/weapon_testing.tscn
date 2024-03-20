@@ -32,7 +32,7 @@ reserve_ammo = 99999
 is_burst_fire = true
 burst_amount = 9
 burst_fire_rate = 0.05
-time_left_to_queue = 1.0
+time_left_to_queue = 3.0
 physics_projectile = ExtResource("4_cxa28")
 hitscan_projectile = ExtResource("5_txgtt")
 
