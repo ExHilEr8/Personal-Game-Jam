@@ -43,11 +43,11 @@ class_name Weapon extends Sprite2D
 
 @export_group("Misc")
 @export var allow_queued_firing: bool = true
-@export var time_left_to_queue: float = float(0.1) :
+@export var time_left_to_queue: float = float(0.2) :
 	get:
 		return time_left_to_queue
 	set(value):
-		time_left_to_queue = clamp(float(value), float(0), float(1))
+		time_left_to_queue = clamp(float(value), float(0), float(fire_rate))
 
 @export_category("Resources")
 @export var physics_projectile: PackedScene
@@ -66,9 +66,9 @@ var reload_timer: Timer
 var fire_rate_timer: Timer
 var is_bursting: bool = false
 var is_reloading: bool = false
-var is_fired_queued: bool = false
 
 var can_fire: bool = true 
+var is_fire_queued: bool = false
 var charge_full_autod_previously: bool = false
 
 var current_charge: float = float(0) :
@@ -93,6 +93,7 @@ func _ready():
 	burst_timer = initialize_general_timer()
 	reload_timer = initialize_general_timer()
 
+	fire_rate_timer.timeout.connect(_attempt_queue_fire)
 	reload_timer.timeout.connect(_reload_timer_finished)
 
 	magazine_count = magazine_size 
@@ -130,6 +131,7 @@ func _process(delta):
 
 	check_attempt_reload()
 
+
 func _physics_process(delta):
 	if is_hitscan == true:
 		for ray in hitscan_raycasts:
@@ -163,15 +165,26 @@ func check_attempt_charge_fire(delta):
 			charge_full_autod_previously = false
 		
 		current_charge = 0
-		
+
+func _attempt_queue_fire():
+	if is_fire_queued == true:
+		try_fire()
+		is_fire_queued = false
+
 func try_fire():
 	determine_can_fire()
 
 	if can_fire == true:
+		fire_rate_timer.start(fire_rate)
+
 		if is_burst_fire == true:
 			burst_fire()
 		else:
 			regular_fire()
+
+	elif can_fire == false and allow_queued_firing == true:
+		if Input.is_action_just_pressed("primary_action") and fire_rate_timer.time_left <= time_left_to_queue:
+			is_fire_queued = true
 
 func burst_fire():
 	is_bursting = true
@@ -180,7 +193,7 @@ func burst_fire():
 		shoot()
 		burst_timer.start(burst_fire_rate)
 		await burst_timer.timeout
-	
+
 	is_bursting = false
 
 func regular_fire():
@@ -227,9 +240,8 @@ func shoot():
 				rotation_param += spread_increment
 			else:
 				fire_projectile(physics_projectile, $BulletInstancePoint.get_global_position(), apply_accuracy(get_global_rotation(), initial_accuracy), projectile_charge)
-			
-	fire_rate_timer.start(fire_rate)
 
+	is_fire_queued = false
 	print("fire", magazine_count, "/", magazine_size)
 
 # fire_projectile() uses the physics_projectile: PackedScene which is generally provided
@@ -329,9 +341,6 @@ func reload() -> void:
 
 	print("reloaded", magazine_count, "/", magazine_size)
 	print("reserve ammo", reserve_ammo)
-
-func reset_time_to_last_shot():
-	time_to_last_shot = float(0)
 
 func initialize_general_timer() -> Timer:
 	var timer = Timer.new()
