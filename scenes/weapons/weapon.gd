@@ -1,8 +1,8 @@
 class_name Weapon extends Sprite2D
 
-###############################
-#####   EXPORT VARIABLES  #####
-###############################
+
+
+##### EXPORT VARIABLE #####
 
 @export_group("Weapon Stats")
 @export var fire_rate: float = float(0.3)
@@ -26,7 +26,7 @@ class_name Weapon extends Sprite2D
 @export_subgroup("Hitscan Misc Options")
 @export var hitscan_ray_length: float = float(2000)
 @export var hitscan_collision_mask: int = CollisionConstants.get_final_layer([CollisionConstants.ENEMY, CollisionConstants.WALL])
-@export var hitscan_custom_instance_point: Vector2 = Vector2(0,0)
+@export var hitscan_custom_instance_point: Vector2 = Vector2.ZERO
 
 
 @export_group("Firemode Options")
@@ -58,9 +58,8 @@ class_name Weapon extends Sprite2D
 @export var hitscan_projectile: PackedScene
 
 
-###############################
-#####   CLASS VARIABLES   #####
-###############################
+
+##### CLASS VARIABLES #####
 
 var hitscan_raycasts = []
 var hitscan_projectile_instances = []
@@ -88,9 +87,8 @@ var magazine_count: int :
 		magazine_count = clamp(value, 0, 9223372036854775807)
 
 
-###############################
-#####      FUNCTIONS      #####
-###############################
+
+##### FUNCTIONS #####
 
 func _ready():
 	fire_rate_timer = initialize_general_timer()
@@ -103,25 +101,12 @@ func _ready():
 	magazine_count = magazine_size 
 
 	if is_hitscan == true:
-		for n in projectile_count:
-			var temp_ray = initialize_raycast()
-			temp_ray.name = ("Hitscan Raycast%s") % [n]
+		hitscan_raycasts = create_multiple_raycasts(projectile_count, $BulletInstancePoint.position)
+		add_multiple_children(self, hitscan_raycasts) 
 
-			# Hitscan instance position is relative to parent node
-			if(hitscan_custom_instance_point != Vector2(0,0)):
-				temp_ray.position = hitscan_custom_instance_point
-			else:
-				temp_ray.position = $BulletInstancePoint.get_position()
+		hitscan_projectile_instances = create_multiple_projectiles(projectile_count)
+		add_multiple_children(self, hitscan_projectile_instances) 
 
-			hitscan_raycasts.append(temp_ray)
-			add_child.call_deferred(temp_ray)
-	
-			var temp_projectile = hitscan_projectile.instantiate()
-			temp_projectile.name = ("Hitscan Projectile%s" % [n])
-
-			hitscan_projectile_instances.append(temp_projectile)
-			add_child(temp_projectile)
-			temp_projectile.enemy_hit.connect(_on_enemy_hit)
 
 func _process(delta):
 	if is_charge_fire == true:
@@ -145,13 +130,16 @@ func check_attempt_reload():
 	if Input.is_action_just_pressed("reload") and reserve_ammo > 0 and magazine_count < magazine_size and is_reloading == false:
 		start_reload()
 
+
 func check_attempt_full_fire():
 	if Input.is_action_pressed("primary_action"):
 		try_fire()
 
+
 func check_attempt_single_fire():
 	if Input.is_action_just_pressed("primary_action"):
 		try_fire()
+
 
 func check_attempt_charge_fire(delta):
 	if Input.is_action_pressed("primary_action"):
@@ -170,10 +158,12 @@ func check_attempt_charge_fire(delta):
 		
 		current_charge = 0
 
+
 func _attempt_queue_fire():
 	if is_fire_queued == true:
 		try_fire()
 		is_fire_queued = false
+
 
 func try_fire():
 	determine_can_fire()
@@ -186,10 +176,10 @@ func try_fire():
 		else:
 			regular_fire()
 		
-
 	elif can_fire == false and allow_queued_firing == true:
 		if Input.is_action_just_pressed("primary_action") and fire_rate_timer.time_left <= time_left_to_queue:
 			is_fire_queued = true
+
 
 func burst_fire():
 	is_bursting = true
@@ -201,8 +191,10 @@ func burst_fire():
 
 	is_bursting = false
 
+
 func regular_fire():
 	shoot()
+
 
 func shoot():
 	var spread_increment = (PI * (1 - initial_accuracy)) / projectile_count
@@ -248,24 +240,18 @@ func shoot():
 	if projectile_cost_override >= 0:
 		deduct_ammo(projectile_cost_override)
 
-
 	print("fire", magazine_count, "/", magazine_size)
 
-# fire_projectile() uses the physics_projectile: PackedScene which is generally provided
-#	in the editor per gun. See PhysicsProjectilePrefab.tscn for more info
+
 func fire_projectile(projectile_scene: PackedScene, projectile_start_point: Vector2, projectile_rotation: float, projectile_charge: float = float(1)):
 	var projectile_instance = projectile_scene.instantiate()
 	projectile_instance.position = projectile_start_point
 	projectile_instance.rotation = projectile_rotation
 	projectile_instance.charge = projectile_charge
+	connect_projectile(projectile_instance)
 	get_tree().get_root().add_child(projectile_instance)
 
 	projectile_instance.apply_impulse(Vector2(projectile_instance.projectile_speed, 0).rotated(projectile_instance.rotation), Vector2())
-
-	projectile_instance.enemy_hit.connect(_on_enemy_hit)
-	projectile_instance.enemy_exit.connect(_on_enemy_exit)
-	projectile_instance.wall_hit.connect(_on_wall_hit)
-	projectile_instance.wall_exit.connect(_on_wall_exit)
 
 	if projectile_cost_override <= 0:
 		deduct_ammo(projectile_instance.ammo_per_shot)
@@ -273,9 +259,6 @@ func fire_projectile(projectile_scene: PackedScene, projectile_start_point: Vect
 	return projectile_instance
 		
 
-
-# fire_hitscan() uses the hitscan_projectile: PackedScene which is generally provided
-#	in the editor per gun. See HitscanProjectilePrefab.tscn for more info
 func fire_hitscan(ray: RayCast2D, projectile, projectile_rotation: float, projectile_charge: float = float(1)):
 	projectile.charge = projectile_charge
 
@@ -306,6 +289,8 @@ func fire_hitscan(ray: RayCast2D, projectile, projectile_rotation: float, projec
 
 	if projectile_cost_override <= 0:
 		deduct_ammo(projectile.ammo_per_shot)
+	
+	return projectile
 		
 
 func determine_can_fire():
@@ -327,22 +312,28 @@ func determine_can_fire():
 		can_fire = false
 		return
 
+
 func damage_enemy(enemy, damage) -> void:
 	enemy.take_damage(damage)
+
 
 func apply_accuracy(initial_rotation, accuracy: float) -> float:
 	var rad_offset = PI * (1 - accuracy) 
 	return randf_range(initial_rotation - rad_offset, initial_rotation + rad_offset)
 
+
 func deduct_ammo(projectile_cost, projectiles_fired: int = int(1)):
 	magazine_count -= projectile_cost * projectiles_fired
+
 
 func start_reload():
 	reload_timer.start(reload_time)
 	is_reloading = true
 
+
 func _reload_timer_finished():
 	reload()
+
 
 func reload() -> void:
 	var amount_to_reload = magazine_size - magazine_count
@@ -360,12 +351,14 @@ func reload() -> void:
 	print("reloaded", magazine_count, "/", magazine_size)
 	print("reserve ammo", reserve_ammo)
 
+
 func initialize_general_timer() -> Timer:
 	var timer = Timer.new()
 	get_tree().get_root().add_child.call_deferred(timer)
 	timer.one_shot = true
 	timer.autostart = false
 	return timer
+
 
 func initialize_raycast() -> RayCast2D:
 	var raycast = RayCast2D.new()
@@ -376,13 +369,57 @@ func initialize_raycast() -> RayCast2D:
 
 	return raycast
 
+
+func create_multiple_raycasts(count: int, instance_point: Vector2) -> Array:
+	var result = []
+
+	for n in count:
+		var temp_ray = initialize_raycast()
+		temp_ray.name = ("Hitscan Raycast%s") % [n]
+
+		# Hitscan instance position is relative to parent node
+		temp_ray.position = instance_point
+
+		result.append(temp_ray)
+
+	return result
+
+
+func create_multiple_projectiles(count: int) -> Array:
+	var result = []
+
+	for n in count:
+		var temp_projectile = hitscan_projectile.instantiate()
+		temp_projectile.name = ("Hitscan Projectile%s" % [n])
+
+		result.append(temp_projectile)
+		connect_projectile(temp_projectile)
+
+	return result
+
+
+func add_multiple_children(parent, children: Array, call_deferred: bool = true) -> void:
+	for child in children:
+		if call_deferred == true:
+			parent.add_child.call_deferred(child)
+		else:
+			parent.add_child(child)
+
+
+func connect_projectile(projectile_list):
+	for projectile in [projectile_list]:
+		projectile.enemy_hit.connect(_on_enemy_hit)
+		projectile.enemy_exit.connect(_on_enemy_exit)
+		projectile.wall_hit.connect(_on_wall_hit)
+		projectile.wall_exit.connect(_on_wall_exit)
+
+
 func get_default_ray_target() -> Vector2:
 	return Vector2(hitscan_ray_length, 0)
 
 
-###############################
-# EXTERNAL SIGNAL CONNECTIONS #
-###############################
+
+### EXTERNAL SIGNAL CONNECTIONS ###
 
 func _on_enemy_hit(hit_position: Vector2, enemy: Node, projectile):
 	damage_enemy(enemy, projectile.damage)
@@ -394,9 +431,11 @@ func _on_enemy_hit(hit_position: Vector2, enemy: Node, projectile):
 			projectile.collider.add_collision_exception_with(enemy)
 			projectile.collider.linear_velocity = Vector2(projectile.projectile_speed, 0).rotated(projectile.get_global_rotation())
 
+
 func _on_enemy_exit(hit_position: Vector2, enemy: Node, projectile):
 	if is_hitscan == false and projectile.is_enemy_piercing == true:
 		projectile.collider.remove_collision_exception_with(enemy)
+
 
 func _on_wall_hit(hit_position: Vector2, wall: Node, projectile):
 	if is_hitscan == false:
@@ -405,6 +444,7 @@ func _on_wall_hit(hit_position: Vector2, wall: Node, projectile):
 		elif projectile.is_wall_piercing == true:
 			projectile.collider.add_collision_exception_with(wall)
 			projectile.collider.linear_velocity = Vector2(projectile.projectile_speed, 0).rotated(projectile.get_global_rotation())
+	
 	
 func _on_wall_exit(hit_position: Vector2, wall: Node, projectile):
 	if is_hitscan == false and projectile.is_wall_piercing == true:
