@@ -8,8 +8,10 @@ class_name Weapon extends Sprite2D
 @export var fire_rate: float = float(0.3)
 @export var reload_time: float = float(1)
 @export_subgroup("Reload Misc")
-@export var reload_single_bullets: bool = false
-@export var bullets_to_reload: int = int(1)
+@export var allow_instant_reload_interruption: bool = false
+@export var reload_individual_bullets: bool = false
+@export var individual_bullet_reload_cost: int = int(1)
+@export var next_reload_cancel_delay: float = float(0.25)
 @export_subgroup("")
 @export var initial_accuracy: float = float(1) :
 	get:
@@ -65,10 +67,12 @@ var hitscan_raycasts = []
 var hitscan_projectile_instances = []
 
 var burst_timer: Timer
-var reload_timer: Timer
 var fire_rate_timer: Timer
+var reload_timer: Timer
+var reload_individual_timer: Timer
 var is_bursting: bool = false
 var is_reloading: bool = false
+var cancel_next_individual: bool = false
 
 var can_fire: bool = true 
 var is_fire_queued: bool = false
@@ -91,12 +95,16 @@ var magazine_count: int :
 ##### FUNCTIONS #####
 
 func _ready():
-	fire_rate_timer = initialize_general_timer()
 	burst_timer = initialize_general_timer()
-	reload_timer = initialize_general_timer()
 
+	fire_rate_timer = initialize_general_timer()
 	fire_rate_timer.timeout.connect(_attempt_queue_fire)
+
+	reload_timer = initialize_general_timer()
 	reload_timer.timeout.connect(_reload_timer_finished)
+
+	reload_individual_timer = initialize_general_timer()
+	reload_individual_timer.timeout.connect(_reload_individual_timer_finished)
 
 	magazine_count = magazine_size 
 
@@ -109,6 +117,9 @@ func _ready():
 
 
 func _process(delta):
+	# Called first to determine if the player wants to shoot if during a reload
+	check_attempt_reload()
+
 	if is_charge_fire == true:
 		check_attempt_charge_fire(delta)
 
@@ -118,8 +129,6 @@ func _process(delta):
 		else:
 			check_attempt_single_fire()
 
-	check_attempt_reload()
-
 
 func _physics_process(delta):
 	if is_hitscan == true:
@@ -127,8 +136,29 @@ func _physics_process(delta):
 			ray.target_position = get_default_ray_target()
 
 func check_attempt_reload():
-	if Input.is_action_just_pressed("reload") and reserve_ammo > 0 and magazine_count < magazine_size and is_reloading == false:
-		start_reload()
+	if Input.is_action_just_pressed("reload"):
+		if reload_individual_bullets == true:
+			if is_reloading == false:
+				if determine_can_reload() == true:
+					start_reload(reload_individual_timer)
+			else:
+				var elapsed_time = reload_individual_timer.wait_time - reload_individual_timer.time_left
+
+				if elapsed_time > next_reload_cancel_delay:
+					print('cancelling next reload')
+					cancel_next_individual = true
+		else:
+			if determine_can_reload() == true:
+				start_reload(reload_timer)
+				
+	elif (Input.is_action_just_pressed("primary_action") and allow_instant_reload_interruption == true and determine_can_fire(true) == true):
+		if is_reloading == true:
+			if reload_individual_bullets == true:
+				cancel_reload(reload_individual_timer)
+			else:
+				cancel_reload(reload_timer)
+
+	
 
 
 func check_attempt_full_fire():
@@ -166,7 +196,7 @@ func _attempt_queue_fire():
 
 
 func try_fire():
-	determine_can_fire()
+	can_fire = determine_can_fire()
 
 	if can_fire == true:
 		fire_rate_timer.start(fire_rate)
@@ -293,25 +323,27 @@ func fire_hitscan(ray: RayCast2D, projectile, projectile_rotation: float, projec
 	return projectile
 		
 
-func determine_can_fire():
-	can_fire = true
-
-	if(is_reloading == true):
-		can_fire = false
-		return
+func determine_can_fire(except_reloading: bool = false) -> bool:
+	if(is_reloading == true and except_reloading == false):
+		return false
 
 	elif(is_bursting == true):
-		can_fire = false
-		return
+		return false
 
 	elif(magazine_count == 0):
-		can_fire = false
-		return
+		return false
 		
 	elif(fire_rate_timer.time_left > 0):
-		can_fire = false
-		return
+		return false
+	
+	return true
 
+
+func determine_can_reload() -> bool:
+	if reserve_ammo > 0 and magazine_count < magazine_size and is_reloading == false:
+		return true
+	
+	return false
 
 func damage_enemy(enemy, damage) -> void:
 	enemy.take_damage(damage)
@@ -326,13 +358,22 @@ func deduct_ammo(projectile_cost, projectiles_fired: int = int(1)):
 	magazine_count -= projectile_cost * projectiles_fired
 
 
-func start_reload():
-	reload_timer.start(reload_time)
+func start_reload(timer: Timer):
+	print('reload started')
+	timer.start(reload_time)
 	is_reloading = true
 
+func cancel_reload(timer: Timer):
+	print('reload interrupted')
+	timer.stop()
+	is_reloading = false
 
 func _reload_timer_finished():
 	reload()
+	is_reloading = false
+
+	print("reloaded", magazine_count, "/", magazine_size)
+	print("reserve ammo", reserve_ammo)
 
 
 func reload() -> void:
@@ -340,21 +381,47 @@ func reload() -> void:
 
 	if(amount_to_reload > reserve_ammo):
 		magazine_count += reserve_ammo
-		reserve_ammo = 0
+		reserve_ammo -= reserve_ammo 
 
 	else:
 		magazine_count += amount_to_reload
 		reserve_ammo -= amount_to_reload
 
+
+func _reload_individual_timer_finished():
+	reload_individual(individual_bullet_reload_cost)
 	is_reloading = false
 
 	print("reloaded", magazine_count, "/", magazine_size)
 	print("reserve ammo", reserve_ammo)
 
+	reload_individual_try_next()
+
+
+func reload_individual(amount_to_reload):
+	var mag_space_left = magazine_size - magazine_count
+
+	if amount_to_reload > reserve_ammo:
+		amount_to_reload = reserve_ammo
+
+	if mag_space_left < amount_to_reload:
+		amount_to_reload = mag_space_left
+
+	magazine_count += amount_to_reload
+	reserve_ammo -= amount_to_reload
+
+
+func reload_individual_try_next():
+	if magazine_size - magazine_count > 0 and cancel_next_individual == false:
+		start_reload(reload_individual_timer)
+
+	# cancel_next_individual is always reset when the next bullet is loaded
+	cancel_next_individual = false
+
 
 func initialize_general_timer() -> Timer:
 	var timer = Timer.new()
-	get_tree().get_root().add_child.call_deferred(timer)
+	add_child.call_deferred(timer)
 	timer.one_shot = true
 	timer.autostart = false
 	return timer
