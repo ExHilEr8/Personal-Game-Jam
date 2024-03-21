@@ -1,5 +1,10 @@
 class_name Projectile extends Node2D
 
+signal enemy_hit(position: Vector2, enemy: Node, projectile)
+signal enemy_exit(position: Vector2, enemy: Node, projectile)
+signal wall_hit(position: Vector2, wall: Node, projectile)
+signal wall_exit(position: Vector2, wall: Node, projectile)
+
 @export_group("Projectile Stats")
 @export var damage: float = float(1)
 @export var projectile_speed: float = float(550)
@@ -31,11 +36,6 @@ var charge: float = float(1):
 		charge = clamp(float(value), float(0), float(1))
 
 var impact_effect: ImpactEffect = ImpactEffect.new()
-
-signal enemy_hit(position: Vector2, enemy: Node, projectile)
-signal enemy_exit(position: Vector2, enemy: Node, projectile)
-signal wall_hit(position: Vector2, wall: Node, projectile)
-signal wall_exit(position: Vector2, wall: Node, projectile)
 
 func _enter_tree():
 	if is_charged_type == true:

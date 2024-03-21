@@ -1,5 +1,8 @@
 class_name Enemy extends CharacterBody2D
 
+signal took_damage(damage: float)
+signal took_lethal_damage()
+
 @export_category("Stats")
 @export var max_health: float = float(100)
 @export var health: float = float(100):
@@ -13,9 +16,6 @@ class_name Enemy extends CharacterBody2D
 
 @export_category("Resources")
 @export var floating_health: Label
-
-signal took_damage(damage: float)
-signal took_lethal_damage()
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
