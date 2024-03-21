@@ -1,7 +1,7 @@
 [gd_scene load_steps=6 format=3 uid="uid://cpw5b5csmui8a"]
 
-[ext_resource type="Script" path="res://scenes/Projectile.gd" id="1_cbkjc"]
-[ext_resource type="PackedScene" uid="uid://dlvguf5ucitpw" path="res://scenes/projectile_animations/tempbulletanimation.tscn" id="2_1oy6k"]
+[ext_resource type="Script" path="res://scenes/projectiles/projectile.gd" id="1_cbkjc"]
+[ext_resource type="PackedScene" uid="uid://dlvguf5ucitpw" path="res://scenes/projectiles/physics_projectiles/animations/temp_bullet_animation.tscn" id="2_1oy6k"]
 [ext_resource type="AudioStream" uid="uid://c32xm70y8sshi" path="res://assets/audio/hitmarker.wav" id="3_75e8f"]
 [ext_resource type="Texture2D" uid="uid://cehqvc2pfgajk" path="res://assets/sprites/tempbullet.png" id="4_8b85v"]
 

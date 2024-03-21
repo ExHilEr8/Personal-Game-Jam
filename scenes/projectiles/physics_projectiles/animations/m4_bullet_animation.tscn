@@ -1,6 +1,6 @@
 [gd_scene load_steps=9 format=3 uid="uid://cvv8wdprhevxn"]
 
-[ext_resource type="Script" path="res://scenes/prefabs/ProjectileAnimationEffect.gd" id="1_fju5b"]
+[ext_resource type="Script" path="res://scenes/prefabs/projectile_animation_effect.gd" id="1_fju5b"]
 [ext_resource type="Texture2D" uid="uid://bq1hfun5lwwd5" path="res://assets/spritesheets/arbulletanimation-Sheet.png" id="1_tlysc"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_a6ls1"]

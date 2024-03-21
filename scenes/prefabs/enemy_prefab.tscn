@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://bew6phnc4wfen"]
 
-[ext_resource type="Script" path="res://scenes/Enemy.gd" id="1_b72ut"]
-[ext_resource type="Script" path="res://scenes/floating_ui.gd" id="2_gvl0h"]
+[ext_resource type="Script" path="res://scenes/prefabs/enemy.gd" id="1_b72ut"]
+[ext_resource type="Script" path="res://scenes/prefabs/floating_ui.gd" id="2_gvl0h"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_psh8q"]
 font_color = Color(0.286275, 0.901961, 0.207843, 1)

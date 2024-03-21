@@ -1,11 +1,11 @@
 [gd_scene load_steps=10 format=3 uid="uid://bintw6dc6kaix"]
 
 [ext_resource type="PackedScene" uid="uid://dbwiyy32jjiv8" path="res://scenes/player/player.tscn" id="1_tgmxy"]
-[ext_resource type="Script" path="res://scenes/weapon_container.gd" id="2_xvo12"]
+[ext_resource type="Script" path="res://scenes/weapons/weapon_container.gd" id="2_xvo12"]
 [ext_resource type="PackedScene" uid="uid://cv3jeqsihp3ey" path="res://scenes/weapons/assault_rifles/m4.tscn" id="3_5a638"]
-[ext_resource type="PackedScene" uid="uid://cm0aq0yd2skvp" path="res://scenes/physics_projectiles/m4bullet.tscn" id="4_cxa28"]
-[ext_resource type="PackedScene" uid="uid://d2hqsdb4xswu5" path="res://scenes/prefabs/HitscanProjectilePrefab.tscn" id="5_txgtt"]
-[ext_resource type="PackedScene" uid="uid://bew6phnc4wfen" path="res://scenes/prefabs/EnemyPrefab.tscn" id="6_3freg"]
+[ext_resource type="PackedScene" uid="uid://cm0aq0yd2skvp" path="res://scenes/projectiles/physics_projectiles/m4bullet.tscn" id="4_cxa28"]
+[ext_resource type="PackedScene" uid="uid://d2hqsdb4xswu5" path="res://scenes/prefabs/hitscan_projectile_prefab.tscn" id="5_txgtt"]
+[ext_resource type="PackedScene" uid="uid://bew6phnc4wfen" path="res://scenes/prefabs/enemy_prefab.tscn" id="6_3freg"]
 [ext_resource type="Texture2D" uid="uid://8ba48ruimrsk" path="res://assets/sprites/tempplayer.png" id="7_ml2a3"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_c4648"]

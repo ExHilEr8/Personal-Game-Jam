@@ -1,8 +1,8 @@
 [gd_scene load_steps=4 format=3 uid="uid://id5go3a541wm"]
 
 [ext_resource type="Texture2D" uid="uid://db4ugxtwnbp6" path="res://assets/sprites/temppistol.png" id="1_kegjo"]
-[ext_resource type="Script" path="res://scenes/Weapon.gd" id="2_khq8r"]
-[ext_resource type="PackedScene" uid="uid://cpw5b5csmui8a" path="res://scenes/physics_projectiles/tempbullet.tscn" id="3_htrof"]
+[ext_resource type="Script" path="res://scenes/weapons/weapon.gd" id="2_khq8r"]
+[ext_resource type="PackedScene" uid="uid://cpw5b5csmui8a" path="res://scenes/projectiles/physics_projectiles/tempbullet.tscn" id="3_htrof"]
 
 [node name="Pistol" type="Sprite2D"]
 texture = ExtResource("1_kegjo")

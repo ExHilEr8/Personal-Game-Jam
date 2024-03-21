@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://b8qtky71h0ahg"]
 
-[ext_resource type="Script" path="res://scenes/prefabs/ProjectileAnimationEffect.gd" id="2_yo0sv"]
+[ext_resource type="Script" path="res://scenes/prefabs/projectile_animation_effect.gd" id="2_yo0sv"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_yjuti"]
 animations = []

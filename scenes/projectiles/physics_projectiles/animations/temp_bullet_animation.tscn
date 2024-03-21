@@ -1,7 +1,7 @@
 [gd_scene load_steps=10 format=3 uid="uid://dlvguf5ucitpw"]
 
 [ext_resource type="Texture2D" uid="uid://cfm0qqna885gv" path="res://assets/spritesheets/tempbulletimpact-Sheet.png" id="1_dkq2b"]
-[ext_resource type="Script" path="res://scenes/prefabs/ProjectileAnimationEffect.gd" id="2_yld7p"]
+[ext_resource type="Script" path="res://scenes/prefabs/projectile_animation_effect.gd" id="2_yld7p"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_37a1i"]
 atlas = ExtResource("1_dkq2b")
